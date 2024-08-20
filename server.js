@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require('./routes/authRoutes');
 const config = require('./config/config');
@@ -9,6 +10,29 @@ connectDB();
 
 // Middleware
 app.use(express.json());
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://crawler-integration.netlify.app",
+    "https://crawlertest.netlify.app",
+  ];
+  
+  // CORS Middleware
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    })
+  );
 
 // Routes
 app.use('/api/auth', authRoutes);
