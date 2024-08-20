@@ -13,8 +13,8 @@ app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://crawler-integration.netlify.app",
-    "https://crawlertest.netlify.app",
+    // "https://crawler-integration.netlify.app",
+    // "https://crawlertest.netlify.app",
   ];
   
   // CORS Middleware
