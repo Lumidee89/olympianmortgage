@@ -13,6 +13,7 @@ app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
+    "https://olympian-mortgage.vercel.app"
     // "https://crawler-integration.netlify.app",
     // "https://crawlertest.netlify.app",
   ];
