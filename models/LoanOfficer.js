@@ -1,3 +1,4 @@
+// models/LoanOfficer.js
 const mongoose = require('mongoose');
 
 const loanOfficerSchema = new mongoose.Schema({
@@ -14,9 +15,9 @@ const loanOfficerSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+    password: {
+        type: String,
+        required: true,
     },
 });
 

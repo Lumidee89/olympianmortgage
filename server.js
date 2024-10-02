@@ -5,6 +5,8 @@ const config = require('./config/config');
 const authRoutes = require('./routes/authRoutes');
 const loanApplicationRoutes = require('./routes/loanApplicationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const loanOfficerRoutes = require('./routes/loanOfficer');
+const chatRoutes = require('./routes/chat');
 
 const app = express();
 
@@ -41,6 +43,8 @@ app.use('/api/auth', authRoutes);
 // app.use('/api/user', userRoutes);
 app.use('/api/loan', loanApplicationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/loan-officer', loanOfficerRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;

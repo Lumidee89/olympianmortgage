@@ -1,6 +1,7 @@
 const Admin = require('../models/Admin');
 const LoanOfficer = require('../models/LoanOfficer');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 // Admin registration
 exports.registerAdmin = async (req, res) => {
@@ -69,16 +70,20 @@ exports.loginAdmin = async (req, res) => {
 // Register a new loan officer
 exports.addLoanOfficer = async (req, res) => {
   try {
-      const { name, email, phone } = req.body;
+      const { name, email, phone, password } = req.body;
+
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       // Create a new loan officer
       const newLoanOfficer = new LoanOfficer({
           name,
           email,
           phone,
+          password: hashedPassword, // Save the hashed password
       });
 
-      // Save to database
+      // Save the loan officer to the database
       await newLoanOfficer.save();
 
       res.status(201).json({
