@@ -6,14 +6,15 @@ const config = require('../config/config');
 
 // Configure nodemailer with SMTP settings from config
 const transporter = nodemailer.createTransport({
-  host: config.smtp.host,
-  port: config.smtp.port,
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
   secure: true, // true for 465, false for 587
   auth: {
-    user: config.smtp.auth.user,
-    pass: config.smtp.auth.pass,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
+
 
 // Register a new user
 exports.register = async (req, res) => {
