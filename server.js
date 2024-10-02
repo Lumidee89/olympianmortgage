@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require("cors");
 const connectDB = require("./config/db");
-const authRoutes = require('./routes/authRoutes');
 const config = require('./config/config');
+const authRoutes = require('./routes/authRoutes');
+const loanApplicationRoutes = require('./routes/loanApplicationRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -13,7 +15,6 @@ app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://olympian-mortgage.vercel.app"
     // "https://crawler-integration.netlify.app",
     // "https://crawlertest.netlify.app",
   ];
@@ -37,6 +38,9 @@ const allowedOrigins = [
 
 // Routes
 app.use('/api/auth', authRoutes);
+// app.use('/api/user', userRoutes);
+app.use('/api/loan', loanApplicationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;
