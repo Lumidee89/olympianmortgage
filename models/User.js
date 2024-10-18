@@ -6,9 +6,14 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phoneNumber: { type: String, required: true },
   password: { type: String, required: true },
-  otp: { type: String }, 
-  otpExpiry: { type: Date }, 
-  isVerified: { type: Boolean, default: false } 
+  country: { type: String },
+  address: { type: String },
+  city: { type: String },
+  state: { type: String },
+  profilePicture: { type: String },
+  otp: { type: String },
+  otpExpiry: { type: Date },
+  isVerified: { type: Boolean, default: false }
 });
 
 const User = mongoose.model('User', userSchema);

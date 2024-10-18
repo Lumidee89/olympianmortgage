@@ -1,21 +1,20 @@
 const multer = require('multer');
 const path = require('path');
 const LoanApplication = require('../models/LoanApplication');
+require('dotenv').config();
+const axios = require('axios');
 
-// Configure multer storage for document uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/documents'); // Specify the upload directory
+    cb(null, 'uploads/documents'); 
   },
   filename: function (req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
 
-// Create the multer upload middleware
 const upload = multer({ storage });
 
-// Create new loan application
 exports.createLoanApplication = async (req, res) => {
   try {
     const userId = req.userId;
@@ -24,20 +23,52 @@ exports.createLoanApplication = async (req, res) => {
       step1: { mainGoal: req.body.mainGoal }
     });
     
-    // Save the new loan application
     await newLoanApplication.save();
     
-    // Return the loanApplicationId along with a success message
     res.status(201).json({
       message: 'Loan application created successfully',
-      loanApplicationId: newLoanApplication._id // Return the ID of the new loan application
+      loanApplicationId: newLoanApplication._id 
     });
   } catch (error) {
     res.status(500).json({ message: 'Error creating loan application', error });
   }
 };
 
-// Update loan application steps
+exports.getUserLoanApplications = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const userLoanApplications = await LoanApplication.find({ userId });
+
+    res.status(200).json({ loanApplications: userLoanApplications });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user loan applications', error });
+  }
+};
+
+exports.editLoanApplication = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { loanApplicationId, ...updateData } = req.body;
+
+    const loanApplication = await LoanApplication.findOne({ _id: loanApplicationId, userId });
+
+    if (!loanApplication) {
+      return res.status(404).json({ message: 'Loan application not found for the user' });
+    }
+
+    for (const step in updateData) {
+      loanApplication[step] = updateData[step];
+    }
+
+    await loanApplication.save();
+
+    res.status(200).json({ message: 'Loan application updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating loan application', error });
+  }
+};
+
 exports.updateLoanApplication = async (req, res) => {
   try {
     const { step, ...updateData } = req.body;
@@ -57,7 +88,6 @@ exports.updateLoanApplication = async (req, res) => {
   }
 };
 
-// Assign loan officer (admin)
 exports.assignLoanOfficer = async (req, res) => {
   try {
       const { loanApplicationId, loanOfficerId } = req.body;
@@ -66,11 +96,7 @@ exports.assignLoanOfficer = async (req, res) => {
       if (!loanApplication) {
           return res.status(404).json({ message: 'Loan application not found' });
       }
-
-      // Assign the loan officer
       loanApplication.assignedLoanOfficer = loanOfficerId;
-
-      // Change status from pending to approved
       loanApplication.status = 'approved';
 
       await loanApplication.save();
@@ -82,7 +108,6 @@ exports.assignLoanOfficer = async (req, res) => {
 };
 
 
-// Handle document upload for step 10
 exports.uploadDocuments = [
   upload.fields([
     { name: 'bankStatements', maxCount: 1 },
@@ -97,7 +122,6 @@ exports.uploadDocuments = [
         return res.status(404).json({ message: 'Loan application not found' });
       }
 
-      // Update the documents in the loan application
       loanApplication.step10 = {
         documents: {
           bankStatements: req.files['bankStatements'] ? req.files['bankStatements'][0].path : null,
@@ -113,3 +137,21 @@ exports.uploadDocuments = [
     }
   }
 ];
+
+const getLoanOffersFromArive = async (loanApplicationData) => {
+  try {
+      const ariveUrl = 'https://api.arive.com/v1/loans/offers';
+
+      const response = await axios.post(ariveUrl, loanApplicationData, {
+          headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.ARIVE_API_KEY
+          }
+      });
+
+      return response.data;
+  } catch (error) {
+      console.error('Error fetching loan offers from ARIVE:', error.response.data);
+      throw error;
+  }
+};

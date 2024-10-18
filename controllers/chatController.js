@@ -1,4 +1,3 @@
-// controllers/chatController.js
 const ChatMessage = require('../models/ChatMessage');
 
 exports.sendMessage = async (req, res) => {

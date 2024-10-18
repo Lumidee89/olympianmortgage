@@ -12,16 +12,13 @@ const app = express();
 
 connectDB();
 
-// Middleware
 app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
-    // "https://crawler-integration.netlify.app",
-    // "https://crawlertest.netlify.app",
+    "https://olympian-mortgage.vercel.app"
   ];
   
-  // CORS Middleware
   app.use(
     cors({
       origin: (origin, callback) => {
@@ -38,15 +35,12 @@ const allowedOrigins = [
     })
   );
 
-// Routes
 app.use('/api/auth', authRoutes);
-// app.use('/api/user', userRoutes);
 app.use('/api/loan', loanApplicationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/loan-officer', loanOfficerRoutes);
 app.use('/api/chat', chatRoutes);
 
-// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
