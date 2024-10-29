@@ -16,7 +16,8 @@ app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://olympian-mortgage.vercel.app"
+    "https://olympian-mortgage.vercel.app",
+    "http://localhost:5174"
   ];
   
   app.use(
