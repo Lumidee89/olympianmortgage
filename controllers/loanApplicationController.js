@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const LoanApplication = require('../models/LoanApplication');
+const User = require('../models/User');
 require('dotenv').config();
 const axios = require('axios');
 
@@ -122,7 +123,7 @@ exports.uploadDocuments = [
         return res.status(404).json({ message: 'Loan application not found' });
       }
 
-      loanApplication.step10 = {
+      loanApplication.step9 = {
         documents: {
           bankStatements: req.files['bankStatements'] ? req.files['bankStatements'][0].path : null,
           profitAndLossStatements: req.files['profitAndLossStatements'] ? req.files['profitAndLossStatements'][0].path : null
@@ -153,5 +154,102 @@ const getLoanOffersFromArive = async (loanApplicationData) => {
   } catch (error) {
       console.error('Error fetching loan offers from ARIVE:', error.response.data);
       throw error;
+  }
+};
+
+exports.addLoan = async (req, res) => {
+  const { userId, step1, step2, step3, step4, step5, step6, step7, step8, step9, status } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const newLoan = new LoanApplication({
+      userId,
+      step1,
+      step2,
+      step3,
+      step4,
+      step5,
+      step6,
+      step7,
+      step8,
+      step9,
+      status: status || 'pending',
+    });
+    await newLoan.save();
+
+    res.status(201).json({
+      message: 'Loan application created successfully',
+      loan: newLoan,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+exports.cloneLoanApplication = async (req, res) => {
+    const { loanId } = req.params;
+
+    try {
+        const loanToClone = await LoanApplication.findById(loanId);
+        if (!loanToClone) {
+            return res.status(404).json({ message: 'Loan application not found' });
+        }
+        const clonedLoan = new LoanApplication({
+            ...loanToClone.toObject(),
+            status: 'pending', 
+            assignedLoanOfficer: null, 
+        });
+        await clonedLoan.save();
+
+        res.status(201).json({
+            message: 'Loan application cloned successfully',
+            loan: clonedLoan,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+
+exports.closeLoanApplication = async (req, res) => {
+  const { loanId } = req.params;
+
+  try {
+      const loan = await LoanApplication.findById(loanId);
+      if (!loan) {
+          return res.status(404).json({ message: 'Loan application not found' });
+      }
+      loan.status = 'closed';
+      await loan.save();
+      res.status(200).json({
+          message: 'Loan application closed successfully',
+          loan,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+exports.suspendLoanApplication = async (req, res) => {
+  const { loanId } = req.params;
+
+  try {
+      const loan = await LoanApplication.findById(loanId);
+      if (!loan) {
+          return res.status(404).json({ message: 'Loan application not found' });
+      }
+      loan.status = 'suspended';
+      await loan.save();
+      res.status(200).json({
+          message: 'Loan application suspended successfully',
+          loan,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error', error });
   }
 };

@@ -1,4 +1,3 @@
-// models/LoanOfficer.js
 const mongoose = require('mongoose');
 
 const loanOfficerSchema = new mongoose.Schema({

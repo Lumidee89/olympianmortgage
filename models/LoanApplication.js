@@ -25,7 +25,7 @@ const LoanApplicationSchema = new Schema({
       email: String,
       phoneNumber: String,
       workPhone: String,
-      militaryStatus: { type: String, enum: ['none', 'currently serving on active duty', 'currently retired discharged or separated from service'] },
+      militaryStatus: { type: String, enum: ['none', 'currently serving on active duty', 'currently retired discharged or separated from service', 'surviving spouse'] },
       coBorrower: {
         firstName: String,
         lastName: String,
@@ -44,17 +44,30 @@ const LoanApplicationSchema = new Schema({
       homeValue: Number,
       homeUsage: String,
       homeType: String,
-      hoaPayment: Number,
+      hoaPayment: String,
+      propertyType: String,
+      propertyUse: String,
+      estimatedPurchasePrice: Number,
+      downPayment: Number,
+      currentlyOwnOrRent: String,
+      workingWithAgent: String,
+      agentFName: String,
+      agentLName: String,
+      agentEmail: String,
+      agentPhoneNumber: String,
+      propertyAddress: String,
     },
   },
   step6: {
     financialInfo: {
+      earnings: String,
       grossIncome: Number,
       bonuses: Number,
       commissions: Number,
       overtime: Number,
       otherIncome: Number,
       employment: {
+        info: String,
         employerName: String,
         employerAddress: String,
         position: String,
@@ -63,16 +76,12 @@ const LoanApplicationSchema = new Schema({
         endDate: Date,
         duration: String,
       },
+      accountType: String,
+      accountNickname: String,
+      amount: Number,
     },
   },
   step7: {
-    accountDetails: [{
-      accountType: String,
-      accountNickname: String,
-      amount: Number
-    }],
-  },
-  step8: {
     softCreditCheck: {
       address: {
         street: String,
@@ -85,14 +94,14 @@ const LoanApplicationSchema = new Schema({
       ssn: String,
     },
   },
-  step9: {
+  step8: {
     demographics: {
       race: String,
       sex: String,
       ethnicity: String,
     },
   },
-  step10: {
+  step9: {
     documents: {
       bankStatements: String,
       profitAndLossStatements: String,

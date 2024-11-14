@@ -13,7 +13,9 @@ const userSchema = new mongoose.Schema({
   profilePicture: { type: String },
   otp: { type: String },
   otpExpiry: { type: Date },
-  isVerified: { type: Boolean, default: false }
+  isVerified: { type: Boolean, default: false },
+  isSuspended: { type: Boolean, default: false },
+  isDisabled: { type: Boolean, default: false }, 
 });
 
 const User = mongoose.model('User', userSchema);
