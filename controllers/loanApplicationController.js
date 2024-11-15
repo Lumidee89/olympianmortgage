@@ -37,15 +37,17 @@ exports.createLoanApplication = async (req, res) => {
 
 exports.getUserLoanApplications = async (req, res) => {
   try {
-    const userId = req.userId;
-
+    const userId = req.userId;  
+    if (!userId) {
+      return res.status(403).json({ message: 'Access denied. Users only.' });
+    }
     const userLoanApplications = await LoanApplication.find({ userId });
-
     res.status(200).json({ loanApplications: userLoanApplications });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching user loan applications', error });
   }
 };
+
 
 exports.editLoanApplication = async (req, res) => {
   try {

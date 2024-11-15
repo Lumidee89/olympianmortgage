@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   isSuspended: { type: Boolean, default: false },
   isDisabled: { type: Boolean, default: false }, 
+  role: { type: String, default: 'user' },
 });
 
 const User = mongoose.model('User', userSchema);

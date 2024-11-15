@@ -31,19 +31,17 @@ exports.register = async (req, res) => {
       phoneNumber,
       password: hashedPassword,
       otp: otp,
-      otpExpiry: Date.now() + 15 * 60 * 1000,
-      isVerified: false 
+      otpExpiry: Date.now() + 15 * 60 * 1000, 
+      isVerified: false,
+      role: 'user' 
     });
-
     await user.save();
-
     await transporter.sendMail({
       from: `"Support" <${config.smtp.auth.user}>`,
       to: email,
       subject: 'Account Verification OTP',
       text: `Your OTP for account verification is ${otp}. It is valid for 15 minutes.`,
     });
-
     res.status(201).json({ message: 'User registered successfully! OTP sent to your email.' });
   } catch (error) {
     console.error(error);
@@ -74,16 +72,22 @@ exports.verifyOtp = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
+
     const user = await User.findOne({ email });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
-    if (!user.isVerified) {
-      return res.status(403).json({ message: 'Account not verified. Please verify your OTP.' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
-    const token = jwt.sign({ userId: user._id }, config.jwt.secret, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      config.jwt.secret || process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
     res.status(200).json({
       token,
       user: {
@@ -94,8 +98,7 @@ exports.login = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Login failed', error });
   }
 };
 

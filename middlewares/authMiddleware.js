@@ -14,10 +14,13 @@ const verifyToken = (req, res, next) => {
         if (err) {
             return res.status(401).json({ message: 'Failed to authenticate token.' });
         }
-        if (decoded.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Admins only.' });
+        if (decoded.role === 'admin') {
+            req.adminId = decoded.adminId;
+        } else if (decoded.role === 'user') {
+            req.userId = decoded.userId;  
+        } else {
+            return res.status(403).json({ message: 'Access denied. Invalid role.' });
         }
-        req.adminId = decoded.adminId;
         
         next();
     });
