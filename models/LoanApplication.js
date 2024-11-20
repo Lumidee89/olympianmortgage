@@ -109,6 +109,7 @@ const LoanApplicationSchema = new Schema({
   },
   status: { type: String, default: 'pending' },
   assignedLoanOfficer: { type: Schema.Types.ObjectId, ref: 'Admin' },
+  createdAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('LoanApplication', LoanApplicationSchema);
