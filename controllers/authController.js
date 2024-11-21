@@ -3,6 +3,35 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const config = require('../config/config');
+const verifyToken = require('../middlewares/authMiddleware'); 
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); 
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, 
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Invalid file type, only JPG, JPEG, PNG, and GIF are allowed.'));
+    }
+  },
+}).single('profilePicture');
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -174,36 +203,39 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { firstname, lastname, email, phoneNumber, password, country, address, city, state, profilePicture } = req.body;
-  try {
-    const user = await User.findById(req.userId);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
-
-    user.firstname = firstname;
-    user.lastname = lastname;
-    user.email = email;
-    user.phoneNumber = phoneNumber;
-    user.country = country;
-    user.address = address;
-    user.city = city;
-    user.state = state;
-    user.profilePicture = profilePicture;
-
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 12);
-      user.password = hashedPassword;
+    const { firstname, lastname, email, phoneNumber, password, country, address, city, state } = req.body;
+    try {
+      const user = await User.findById(req.userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      if (firstname) user.firstname = firstname;
+      if (lastname) user.lastname = lastname;
+      if (email) user.email = email;
+      if (phoneNumber) user.phoneNumber = phoneNumber;
+      if (country) user.country = country;
+      if (address) user.address = address;
+      if (city) user.city = city;
+      if (state) user.state = state;
+      if (req.file) {
+        const imagePath = path.join('uploads', req.file.filename);
+        user.profilePicture = imagePath;
+      }
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 12);
+        user.password = hashedPassword;
+      }
+      await user.save();
+      res.status(200).json({ message: 'Profile updated successfully', user });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
     }
-
-    await user.save();
-
-    res.status(200).json({ message: 'Profile updated successfully', user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
+  });
 };
 
 exports.getAllUsers = async (req, res) => {
@@ -219,5 +251,28 @@ exports.getAllUsers = async (req, res) => {
   } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('firstname lastname email phoneNumber country address city state profilePicture');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      country: user.country,
+      address: user.address,
+      city: user.city,
+      state: user.state,
+      profilePicture: user.profilePicture,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
