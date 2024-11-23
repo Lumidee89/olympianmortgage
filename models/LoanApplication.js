@@ -1,18 +1,29 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const LoanApplicationSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   step1: {
-    mainGoal: { type: String, enum: ['buy a home', 'refinance'], required: true },
+    mainGoal: {
+      type: String,
+      enum: ["buy a home", "refinance"],
+      required: true,
+    },
   },
   step2: {
-    foundHome: { type: String, enum: ['yes', 'no'], required: false },
+    foundHome: { type: String, enum: ["yes", "no"], required: false },
   },
   step3: {
-    refinanceGoal: { 
-      goalType: { type: String, enum: ['take cash out of my home', 'lower my monthly payment', 'payoff my mortgage faster'] },
-      amount: { type: Number }
+    refinanceGoal: {
+      goalType: {
+        type: String,
+        enum: [
+          "take cash out of my home",
+          "lower my monthly payment",
+          "payoff my mortgage faster",
+        ],
+      },
+      amount: { type: Number },
     },
   },
   step4: {
@@ -25,7 +36,15 @@ const LoanApplicationSchema = new Schema({
       email: String,
       phoneNumber: String,
       workPhone: String,
-      militaryStatus: { type: String, enum: ['none', 'currently serving on active duty', 'currently retired discharged or separated from service', 'surviving spouse'] },
+      militaryStatus: {
+        type: String,
+        enum: [
+          "none",
+          "currently serving on active duty",
+          "currently retired discharged or separated from service",
+          "surviving spouse",
+        ],
+      },
       coBorrower: {
         firstName: String,
         lastName: String,
@@ -107,9 +126,14 @@ const LoanApplicationSchema = new Schema({
       profitAndLossStatements: String,
     },
   },
-  status: { type: String, default: 'pending' },
-  assignedLoanOfficer: { type: Schema.Types.ObjectId, ref: 'Admin' },
+  status: { type: String, default: "pending" },
+  assignedLoanOfficer: { type: Schema.Types.ObjectId, ref: "Admin" },
   createdAt: { type: Date, default: Date.now },
+
+  // Add current stage to Loan Application
+  // - Ibrahim
+
+  currentStage: { type: Number, default: 1 },
 });
 
-module.exports = mongoose.model('LoanApplication', LoanApplicationSchema);
+module.exports = mongoose.model("LoanApplication", LoanApplicationSchema);

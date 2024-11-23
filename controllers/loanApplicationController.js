@@ -140,12 +140,15 @@ exports.uploadDocuments = [
   async (req, res) => {
     try {
       const { loanApplicationId } = req.body;
+
+      // Fetch the loan application document by ID
       const loanApplication = await LoanApplication.findById(loanApplicationId);
 
       if (!loanApplication) {
         return res.status(404).json({ message: "Loan application not found" });
       }
 
+      // Update the step9 documents with uploaded file paths
       loanApplication.step9 = {
         documents: {
           bankStatements: req.files["bankStatements"]
@@ -157,9 +160,16 @@ exports.uploadDocuments = [
         },
       };
 
+      // Update the current stage to 2
+      // - Ibrahim
+      loanApplication.currentStage = 2;
+
+      // Save the updated loan application
       await loanApplication.save();
 
-      res.status(200).json({ message: "Documents uploaded successfully" });
+      res
+        .status(200)
+        .json({ message: "Documents uploaded successfully", loanApplication });
     } catch (error) {
       res.status(500).json({ message: "Error uploading documents", error });
     }
@@ -318,5 +328,42 @@ exports.clearLoanApplications = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error clearing loan applications", error });
+  }
+};
+
+// Get Loan Application base on Loan ID
+// - Ibrahim
+
+exports.getLoanApplicationById = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { loanApplicationId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    if (!loanApplicationId) {
+      return res
+        .status(400)
+        .json({ message: "Loan application ID is required" });
+    }
+
+    // Fetch the loan application matching userId and loanApplicationId
+    const loanApplication = await LoanApplication.findOne({
+      _id: loanApplicationId,
+      userId,
+    });
+
+    if (!loanApplication) {
+      return res
+        .status(404)
+        .json({ message: "Loan application not found for the user" });
+    }
+
+    res.status(200).json({ loanApplication });
+  } catch (error) {
+    console.error("Error fetching loan application:", error);
+    res.status(500).json({ message: "Error fetching loan application", error });
   }
 };

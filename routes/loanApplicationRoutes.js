@@ -50,4 +50,13 @@ router.delete(
   loanApplicationController.clearLoanApplications
 );
 
+// Get Loan Application base on Loan ID
+// - Ibrahim
+
+router.get(
+  "/:loanApplicationId",
+  verifyToken,
+  loanApplicationController.getLoanApplicationById
+);
+
 module.exports = router;

@@ -76,11 +76,9 @@ exports.register = async (req, res) => {
       subject: "Account Verification OTP",
       text: `Your OTP for account verification is ${otp}. It is valid for 15 minutes.`,
     });
-    res
-      .status(201)
-      .json({
-        message: "User registered successfully! OTP sent to your email.",
-      });
+    res.status(201).json({
+      message: "User registered successfully! OTP sent to your email.",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -183,11 +181,9 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     user.otpExpiry = undefined;
     await user.save();
 
-    res
-      .status(200)
-      .json({
-        message: "OTP verified successfully! You can now reset your password.",
-      });
+    res.status(200).json({
+      message: "OTP verified successfully! You can now reset your password.",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -231,6 +227,7 @@ exports.updateProfile = async (req, res) => {
       address,
       city,
       state,
+      profilePicture,
     } = req.body;
     try {
       const user = await User.findById(req.userId);
@@ -245,10 +242,11 @@ exports.updateProfile = async (req, res) => {
       if (address) user.address = address;
       if (city) user.city = city;
       if (state) user.state = state;
-      if (req.file) {
-        const imagePath = path.join("uploads", req.file.filename);
-        user.profilePicture = imagePath;
-      }
+      if (profilePicture) user.profilePicture = profilePicture;
+      // if (req.file) {
+      //   const imagePath = path.join("uploads", req.file.filename);
+      //   user.profilePicture = imagePath;
+      // }
       if (password) {
         const hashedPassword = await bcrypt.hash(password, 12);
         user.password = hashedPassword;
