@@ -115,15 +115,22 @@ exports.login = async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    // Update lastLogin field
+    user.lastLogin = new Date();
+    await user.save();
+
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       config.jwt.secret || process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+
     res.status(200).json({
       token,
       user: {
@@ -217,6 +224,7 @@ exports.updateProfile = async (req, res) => {
     if (err) {
       return res.status(400).json({ message: err.message });
     }
+
     const {
       firstname,
       lastname,
@@ -229,11 +237,13 @@ exports.updateProfile = async (req, res) => {
       state,
       profilePicture,
     } = req.body;
+
     try {
       const user = await User.findById(req.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+
       if (firstname) user.firstname = firstname;
       if (lastname) user.lastname = lastname;
       if (email) user.email = email;
@@ -243,14 +253,15 @@ exports.updateProfile = async (req, res) => {
       if (city) user.city = city;
       if (state) user.state = state;
       if (profilePicture) user.profilePicture = profilePicture;
-      // if (req.file) {
-      //   const imagePath = path.join("uploads", req.file.filename);
-      //   user.profilePicture = imagePath;
-      // }
+
       if (password) {
         const hashedPassword = await bcrypt.hash(password, 12);
         user.password = hashedPassword;
       }
+
+      // Update updatedAt field
+      user.updatedAt = new Date();
+
       await user.save();
       res.status(200).json({ message: "Profile updated successfully", user });
     } catch (error) {

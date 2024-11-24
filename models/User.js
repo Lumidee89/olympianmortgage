@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   firstname: { type: String, required: true },
@@ -15,10 +15,13 @@ const userSchema = new mongoose.Schema({
   otpExpiry: { type: Date },
   isVerified: { type: Boolean, default: false },
   isSuspended: { type: Boolean, default: false },
-  isDisabled: { type: Boolean, default: false }, 
-  role: { type: String, default: 'user' },
+  isDisabled: { type: Boolean, default: false },
+  role: { type: String, default: "user" },
+  createdAt: { type: Date, default: Date.now },
+  lastLogin: { type: Date, default: null },
+  updatedAt: { type: Date, default: null },
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
