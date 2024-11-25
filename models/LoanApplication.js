@@ -130,10 +130,12 @@ const LoanApplicationSchema = new Schema({
   assignedLoanOfficer: { type: Schema.Types.ObjectId, ref: "Admin" },
   createdAt: { type: Date, default: Date.now },
 
-  // Add current stage to Loan Application
+  // Add current stage to Loan Application, Updated At
   // - Ibrahim
-
+  step: { type: Number, default: 1 },
   currentStage: { type: Number, default: 1 },
+
+  updatedAt: { type: Date, default: null },
 });
 
 module.exports = mongoose.model("LoanApplication", LoanApplicationSchema);

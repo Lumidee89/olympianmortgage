@@ -55,6 +55,7 @@ exports.editLoanApplication = async (req, res) => {
     const userId = req.userId;
     const { loanApplicationId, ...updateData } = req.body;
 
+    // Find the loan application by ID and userId
     const loanApplication = await LoanApplication.findOne({
       _id: loanApplicationId,
       userId,
@@ -66,10 +67,15 @@ exports.editLoanApplication = async (req, res) => {
         .json({ message: "Loan application not found for the user" });
     }
 
+    // Update fields with data from the request
     for (const step in updateData) {
       loanApplication[step] = updateData[step];
     }
 
+    // Set the updatedAt field to the current date
+    loanApplication.updatedAt = new Date();
+
+    // Save the updated loan application
     await loanApplication.save();
 
     res.status(200).json({ message: "Loan application updated successfully" });
@@ -87,26 +93,47 @@ exports.updateLoanApplication = async (req, res) => {
     if (!loanApplicationId) {
       return res
         .status(400)
-        .json({ message: "Loan application ID is required" });
+        .json({ message: "Loan application ID is required." });
     }
+
+    // Validate the step number
+    if (!step || typeof step !== "number" || step < 1 || step > 9) {
+      return res
+        .status(400)
+        .json({ message: "Valid step number (1-9) is required." });
+    }
+
+    // Find the loan application for the user
     const loanApplication = await LoanApplication.findOne({
       _id: loanApplicationId,
       userId,
     });
+
     if (!loanApplication) {
-      return res.status(404).json({ message: "Loan application not found" });
+      return res.status(404).json({ message: "Loan application not found." });
     }
-    if (!step || typeof step !== "number") {
-      return res.status(400).json({ message: "Valid step number is required" });
-    }
+
+    // Dynamically update the specific step
     loanApplication[`step${step}`] = updateData;
+
+    loanApplication.step = step;
+
+    // Update the timestamp
+    loanApplication.updatedAt = new Date();
+
+    // Save the changes
     await loanApplication.save();
-    res
-      .status(200)
-      .json({ message: `Step ${step} updated successfully`, loanApplication });
+
+    res.status(200).json({
+      message: `Step ${step} updated successfully.`,
+      loanApplication,
+    });
   } catch (error) {
     console.error("Error updating loan application:", error);
-    res.status(500).json({ message: "Error updating loan application", error });
+    res.status(500).json({
+      message: "An error occurred while updating the loan application.",
+      error: error.message,
+    });
   }
 };
 

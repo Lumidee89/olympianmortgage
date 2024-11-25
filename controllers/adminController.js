@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const Loan = require("../models/LoanApplication");
 const config = require("../config/config");
 const User = require("../models/User");
+const LoanApplication = require("../models/LoanApplication");
 
 exports.registerAdmin = async (req, res) => {
   const { name, email, password } = req.body;
@@ -119,6 +120,35 @@ exports.getUserDetailsById = async (req, res) => {
   } catch (error) {
     console.error("Error fetching user details:", error);
     res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// Get Loan Application base on Loan ID
+// - Ibrahim
+
+exports.getLoanApplicationById = async (req, res) => {
+  try {
+    const { loanApplicationId } = req.params;
+
+    if (!loanApplicationId) {
+      return res
+        .status(400)
+        .json({ message: "Loan application ID is required" });
+    }
+
+    // Fetch the loan application matching userId and loanApplicationId
+    const loanApplication = await LoanApplication.findOne({
+      _id: loanApplicationId,
+    });
+
+    if (!loanApplication) {
+      return res.status(404).json({ message: "Loan application not found  " });
+    }
+
+    res.status(200).json({ loanApplication });
+  } catch (error) {
+    console.error("Error fetching loan application:", error);
+    res.status(500).json({ message: "Error fetching loan application", error });
   }
 };
 

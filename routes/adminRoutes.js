@@ -25,6 +25,12 @@ router.get(
   loanApplicationController.getLoansByUserId
 );
 
+router.get(
+  "/loan/:loanApplicationId",
+  verifyToken,
+  adminController.getLoanApplicationById
+);
+
 router.get("/user/:userId", verifyToken, adminController.getUserDetailsById);
 
 router.post("/add-lead", verifyToken, leadController.addLead);
