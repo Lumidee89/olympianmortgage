@@ -8,7 +8,7 @@ const verifyToken = require("../middlewares/authMiddleware");
 
 router.post("/register", adminController.registerAdmin);
 router.post("/login", adminController.loginAdmin);
-router.post("/add-loan-officer", verifyToken, adminController.addLoanOfficer);
+router.post("/add-loan-officer", adminController.addLoanOfficer);
 router.post(
   "/assign-loan-officer",
   verifyToken,

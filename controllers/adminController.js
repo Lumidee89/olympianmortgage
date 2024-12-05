@@ -90,14 +90,18 @@ exports.addLoanOfficer = async (req, res) => {
 
 exports.getLoans = async (req, res) => {
   try {
-    const loans = await Loan.find().populate("userId", "name email");
+    const loans = await Loan.find().populate(
+      "userId",
+      "firstname lastname email"
+    );
 
     res.status(200).json({
       message: "Loans retrieved successfully",
       loans,
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error retrieving loans:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
