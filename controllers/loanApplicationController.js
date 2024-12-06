@@ -147,6 +147,7 @@ exports.assignLoanOfficer = async (req, res) => {
     }
     loanApplication.assignedLoanOfficer = loanOfficerId;
     loanApplication.status = "approved";
+    loanApplication.currentStage = 3;
 
     await loanApplication.save();
 
@@ -380,7 +381,7 @@ exports.getLoanApplicationById = async (req, res) => {
     const loanApplication = await LoanApplication.findOne({
       _id: loanApplicationId,
       userId,
-    });
+    }).populate("userId", "firstname lastname email");
 
     if (!loanApplication) {
       return res
@@ -403,7 +404,7 @@ exports.getLoansByUserId = async (req, res) => {
     // Find all loans associated with the userId
     const loans = await LoanApplication.find({ userId }).populate(
       "userId",
-      "name email"
+      "firstname lastname email"
     );
 
     if (!loans || loans.length === 0) {
@@ -417,5 +418,26 @@ exports.getLoansByUserId = async (req, res) => {
   } catch (error) {
     console.error("Error fetching loans:", error);
     res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// Ibrahim
+
+exports.getLoansBasedonStatus = async (req, res) => {
+  try {
+    const { status } = req.query;
+
+    if (!status) {
+      return res
+        .status(400)
+        .json({ error: "Status query parameter is required" });
+    }
+
+    // Fetch loans with the specified status
+    const loans = await LoanApplication.find({ status });
+    res.status(200).json(loans);
+  } catch (error) {
+    console.error("Error fetching loans:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

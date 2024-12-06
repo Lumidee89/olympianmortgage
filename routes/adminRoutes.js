@@ -11,7 +11,7 @@ router.post("/login", adminController.loginAdmin);
 router.post("/add-loan-officer", adminController.addLoanOfficer);
 router.post(
   "/assign-loan-officer",
-  verifyToken,
+
   loanApplicationController.assignLoanOfficer
 );
 router.get("/loans", verifyToken, adminController.getLoans);

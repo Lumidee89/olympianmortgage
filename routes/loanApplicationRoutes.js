@@ -59,4 +59,11 @@ router.get(
   loanApplicationController.getLoanApplicationById
 );
 
+// Fetch loans based on status
+router.get(
+  "/:loan-applications",
+  verifyToken,
+  loanApplicationController.getLoansBasedonStatus
+);
+
 module.exports = router;

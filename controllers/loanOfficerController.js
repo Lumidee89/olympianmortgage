@@ -49,3 +49,24 @@ exports.getAllLoanOfficers = async (req, res) => {
     });
   }
 };
+
+exports.getLoanOfficerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Loan officer ID is required" });
+    }
+
+    const loanOfficer = await LoanOfficer.findById(id).select("name email");
+
+    if (!loanOfficer) {
+      return res.status(404).json({ error: "Loan officer not found" });
+    }
+
+    res.status(200).json(loanOfficer);
+  } catch (error) {
+    console.error("Error fetching loan officer:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
