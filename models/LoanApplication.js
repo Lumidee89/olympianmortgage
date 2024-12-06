@@ -136,6 +136,12 @@ const LoanApplicationSchema = new Schema({
   currentStage: { type: Number, default: 1 },
 
   updatedAt: { type: Date, default: null },
+
+  loanDocuments: {
+    loanAgreements: Boolean,
+    deedOfTrust: Boolean,
+    appraisal: Boolean,
+  },
 });
 
 module.exports = mongoose.model("LoanApplication", LoanApplicationSchema);

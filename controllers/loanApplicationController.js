@@ -146,7 +146,7 @@ exports.assignLoanOfficer = async (req, res) => {
       return res.status(404).json({ message: "Loan application not found" });
     }
     loanApplication.assignedLoanOfficer = loanOfficerId;
-    loanApplication.status = "approved";
+    loanApplication.status = "pending";
     loanApplication.currentStage = 3;
 
     await loanApplication.save();
@@ -439,5 +439,39 @@ exports.getLoansBasedonStatus = async (req, res) => {
   } catch (error) {
     console.error("Error fetching loans:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Ibrahim
+
+exports.updateESignDocuments = async (req, res) => {
+  const { applicationId } = req.params;
+  const { documentType } = req.body;
+
+  if (!documentType) {
+    return res
+      .status(400)
+      .json({ error: "Document type and URL are required." });
+  }
+
+  try {
+    const loanApplication = await LoanApplication.findById(applicationId);
+
+    if (!loanApplication) {
+      return res.status(404).json({ error: "Loan application not found." });
+    }
+
+    loanApplication.loanDocuments[documentType] = true;
+    await loanApplication.save();
+
+    res.status(200).json({
+      message: "Document Signed updated successfully.",
+      loanDocuments,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Server error. Unable to update document Signed." });
   }
 };

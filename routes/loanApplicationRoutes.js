@@ -18,6 +18,14 @@ router.post(
   verifyToken,
   loanApplicationController.uploadDocuments
 );
+
+// Ibrahim
+router.post(
+  "/upload-e-sign-documents/:applicationId",
+  verifyToken,
+  loanApplicationController.updateESignDocuments
+);
+
 router.get(
   "/loan-applications",
   verifyToken,
