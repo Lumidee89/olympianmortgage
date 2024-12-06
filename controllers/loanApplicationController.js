@@ -466,7 +466,7 @@ exports.updateESignDocuments = async (req, res) => {
 
     res.status(200).json({
       message: "Document Signed updated successfully.",
-      loanDocuments,
+      loanApplication,
     });
   } catch (error) {
     console.error(error);
