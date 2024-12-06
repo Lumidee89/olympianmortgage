@@ -1,4 +1,5 @@
 const ChatMessage = require('../models/ChatMessage');
+const { createNotification } = require('../controllers/notificationController');
 
 exports.sendMessage = async (req, res) => {
     try {
@@ -13,6 +14,15 @@ exports.sendMessage = async (req, res) => {
 
         await newMessage.save();
 
+        //notifications
+        const senderRole = req.adminId ? 'Admin' : 'LoanOfficer';
+        const notificationMessage = `${senderRole} sent you a new message: "${message}"`;
+        await createNotification(loanOfficerId, 'LoanOfficer', notificationMessage, { chatMessage: newMessage });
+        if (req.adminId || req.userId) {
+            await createNotification(senderId, 'User', `You sent a message to Loan Officer`, { chatMessage: newMessage });
+        }
+        //end of notification
+        
         res.status(201).json({ message: 'Chat message sent successfully', chatMessage: newMessage });
     } catch (error) {
         res.status(500).json({ message: 'Error sending chat message', error });

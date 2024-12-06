@@ -17,7 +17,9 @@ const verifyToken = (req, res, next) => {
         if (decoded.role === 'admin') {
             req.adminId = decoded.adminId;
         } else if (decoded.role === 'user') {
-            req.userId = decoded.userId;  
+            req.userId = decoded.userId;
+        } else if (decoded.role === 'loan_officer') {
+            req.loanOfficerId = decoded.loanOfficerId; 
         } else {
             return res.status(403).json({ message: 'Access denied. Invalid role.' });
         }

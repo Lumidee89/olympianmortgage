@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const LoanApplication = require("../models/LoanApplication");
+const { createNotification } = require('../controllers/notificationController');
 const User = require("../models/User");
 require("dotenv").config();
 const axios = require("axios");
@@ -25,6 +26,11 @@ exports.createLoanApplication = async (req, res) => {
     });
 
     await newLoanApplication.save();
+
+    //notification LOC
+    await createNotification(null, 'Admin', 'A new loan application has been created by a user.');
+    await createNotification(userId, 'User', 'Your loan application has been successfully created.');
+    //end
 
     res.status(201).json({
       message: "Loan application created successfully",
@@ -77,6 +83,11 @@ exports.editLoanApplication = async (req, res) => {
 
     // Save the updated loan application
     await loanApplication.save();
+
+    //notifications LOC
+    await createNotification(null, 'Admin', `A loan application has been updated by user ${userId}.`);
+    await createNotification(userId, 'User', 'Your loan application has been updated successfully.' );
+    //end
 
     res.status(200).json({ message: "Loan application updated successfully" });
   } catch (error) {
@@ -150,6 +161,12 @@ exports.assignLoanOfficer = async (req, res) => {
     loanApplication.currentStage = 3;
 
     await loanApplication.save();
+
+    //notifications LOC
+    await createNotification(null, 'Admin', `A loan officer has been assigned to loan application ${loanApplicationId}.`);
+    await createNotification(loanOfficerId, 'User', `You have been assigned to a loan application.`);
+    await createNotification(loanApplication.userId, 'User', 'A loan officer has been assigned to your application.');
+    //end
 
     res.status(200).json({
       message:
@@ -351,6 +368,12 @@ exports.closeLoanApplication = async (req, res) => {
     }
     loan.status = "closed";
     await loan.save();
+
+    //notification LOC
+    await createNotification(null, 'Admin', `Loan application ${loanId} has been closed.`);
+    await createNotification(loan.userId, 'User', 'Your loan application has been closed successfully.');
+    //end
+
     res.status(200).json({
       message: "Loan application closed successfully",
       loan,
@@ -371,6 +394,12 @@ exports.suspendLoanApplication = async (req, res) => {
     }
     loan.status = "suspended";
     await loan.save();
+
+    //notifications LOC
+    await createNotification(null, 'Admin', `Loan application ${loanId} has been suspended.`);
+    await createNotification(loan.userId, 'User', 'Your loan application has been suspended.');
+    //end
+
     res.status(200).json({
       message: "Loan application suspended successfully",
       loan,
