@@ -167,32 +167,57 @@ exports.uploadDocuments = [
   ]),
   async (req, res) => {
     try {
-      const { loanApplicationId } = req.body;
+      const { loanApplicationId, category } = req.body;
 
-      // Fetch the loan application document by ID
       const loanApplication = await LoanApplication.findById(loanApplicationId);
 
       if (!loanApplication) {
         return res.status(404).json({ message: "Loan application not found" });
       }
 
-      // Update the step9 documents with uploaded file paths
-      loanApplication.step9 = {
-        documents: {
+      const uploadedFiles = [];
+
+      if (req.files["bankStatements"]) {
+        uploadedFiles.push({
+          filename: req.files["bankStatements"][0].path,
+          uploadedAt: new Date(),
+        });
+      }
+
+      if (req.files["profitAndLossStatements"]) {
+        uploadedFiles.push({
+          filename: req.files["profitAndLossStatements"][0].path,
+          uploadedAt: new Date(),
+        });
+      }
+
+      if (category) {
+
+        let categoryObj = loanApplication.step9.categories.find(
+          (cat) => cat.name === category
+        );
+
+        if (!categoryObj) {
+
+          categoryObj = { name: category, documents: [] };
+          loanApplication.step9.categories.push(categoryObj);
+        }
+
+        categoryObj.documents.push(...uploadedFiles);
+      } else {
+
+        loanApplication.step9.documents = {
           bankStatements: req.files["bankStatements"]
             ? req.files["bankStatements"][0].path
             : null,
           profitAndLossStatements: req.files["profitAndLossStatements"]
             ? req.files["profitAndLossStatements"][0].path
             : null,
-        },
-      };
+        };
+      }
 
-      // Update the current stage to 2
-      // - Ibrahim
       loanApplication.currentStage = 2;
 
-      // Save the updated loan application
       await loanApplication.save();
 
       res
@@ -203,6 +228,28 @@ exports.uploadDocuments = [
     }
   },
 ];
+
+exports.getUserDocuments = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const loanApplications = await LoanApplication.find({ userId });
+
+    if (!loanApplications.length) {
+      return res.status(404).json({ message: "No documents found" });
+    }
+
+    const documents = loanApplications.map((application) => ({
+      loanApplicationId: application._id,
+      documents: application.step9.documents,
+      categories: application.step9.categories,
+    }));
+
+    res.status(200).json({ documents });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching documents", error });
+  }
+};
 
 const getLoanOffersFromArive = async (loanApplicationData) => {
   try {

@@ -3,39 +3,13 @@ const router = express.Router();
 const loanApplicationController = require("../controllers/loanApplicationController");
 const verifyToken = require("../middlewares/authMiddleware");
 
-router.post(
-  "/create",
-  verifyToken,
-  loanApplicationController.createLoanApplication
-);
-router.put(
-  "/update",
-  verifyToken,
-  loanApplicationController.updateLoanApplication
-);
-router.post(
-  "/upload-documents",
-  verifyToken,
-  loanApplicationController.uploadDocuments
-);
-
+router.post("/create", verifyToken, loanApplicationController.createLoanApplication);
+router.put("/update", verifyToken, loanApplicationController.updateLoanApplication);
+router.post("/upload-documents", verifyToken, loanApplicationController.uploadDocuments);
 // Ibrahim
-router.post(
-  "/upload-e-sign-documents/:applicationId",
-  verifyToken,
-  loanApplicationController.updateESignDocuments
-);
-
-router.get(
-  "/loan-applications",
-  verifyToken,
-  loanApplicationController.getUserLoanApplications
-);
-router.patch(
-  "/loan-applications/:id/edit",
-  verifyToken,
-  loanApplicationController.editLoanApplication
-);
+router.post("/upload-e-sign-documents/:applicationId", verifyToken, loanApplicationController.updateESignDocuments);
+router.get("/loan-applications", verifyToken, loanApplicationController.getUserLoanApplications);
+router.patch("/loan-applications/:id/edit", verifyToken, loanApplicationController.editLoanApplication);
 router.post("/loan-offers", async (req, res) => {
   try {
     const loanApplicationData = req.body;
@@ -52,26 +26,12 @@ router.post("/loan-offers", async (req, res) => {
 // Clear all Loan Applications based on the User ID
 // - Ibrahim
 
-router.delete(
-  "/loan-applications/clear",
-  verifyToken,
-  loanApplicationController.clearLoanApplications
-);
-
+router.delete("/loan-applications/clear", verifyToken, loanApplicationController.clearLoanApplications);
 // Get Loan Application base on Loan ID
 // - Ibrahim
-
-router.get(
-  "/:loanApplicationId",
-  verifyToken,
-  loanApplicationController.getLoanApplicationById
-);
-
+router.get("/:loanApplicationId", verifyToken, loanApplicationController.getLoanApplicationById);
 // Fetch loans based on status
-router.get(
-  "/:loan-applications",
-  verifyToken,
-  loanApplicationController.getLoansBasedonStatus
-);
+router.get("/:loan-applications", verifyToken, loanApplicationController.getLoansBasedonStatus);
+router.get( "/user-documents", verifyToken, loanApplicationController.getUserDocuments);
 
 module.exports = router;
