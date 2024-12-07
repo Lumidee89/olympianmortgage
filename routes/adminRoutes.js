@@ -5,6 +5,7 @@ const loanApplicationController = require("../controllers/loanApplicationControl
 const leadController = require("../controllers/leadController");
 const authController = require("../controllers/authController");
 const verifyToken = require("../middlewares/authMiddleware");
+const uploadMiddleware = require("../middlewares/pictureMiddleware");
 
 router.post("/register", adminController.registerAdmin);
 router.post("/login", adminController.loginAdmin);
@@ -57,5 +58,8 @@ router.get("/get-all-users", verifyToken, authController.getAllUsers);
 router.put("/users/:userId", verifyToken, adminController.editUserDetails);
 router.put("/users/:userId/suspend", verifyToken, adminController.suspendUser);
 router.put("/users/:userId/disable", verifyToken, adminController.disableUser);
+
+router.get("/profile", verifyToken, adminController.getAdminProfile);
+router.put("/profile", verifyToken, uploadMiddleware, adminController.updateAdminProfile);
 
 module.exports = router;

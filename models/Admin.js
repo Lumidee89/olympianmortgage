@@ -5,6 +5,12 @@ const AdminSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  phone: { type: String }, 
+  profilePicture: { type: String },
+  country: { type: String },
+  city: { type: String },
+  state: { type: String },
+  address: { type: String },
 });
 
 AdminSchema.pre('save', async function(next) {
@@ -13,6 +19,7 @@ AdminSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
+
 AdminSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
