@@ -11,7 +11,7 @@ exports.addContent = async (req, res) => {
     const newContent = new Content({
       title,
       body,
-      createdBy: req.adminId, 
+      createdBy: req.userRole === "admin" ? req.adminId : req.loanOfficerId,
     });
 
     await newContent.save();
@@ -27,6 +27,7 @@ exports.addContent = async (req, res) => {
     });
   }
 };
+
 
 exports.getAllContents = async (req, res) => {
     try {

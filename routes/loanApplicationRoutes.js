@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const loanApplicationController = require("../controllers/loanApplicationController");
-const verifyToken = require("../middlewares/authMiddleware");
+const { verifyToken, isAdminOrLoanOfficer } = require("../middlewares/authMiddleware");
 
 router.post("/create", verifyToken, loanApplicationController.createLoanApplication);
 router.put("/update", verifyToken, loanApplicationController.updateLoanApplication);

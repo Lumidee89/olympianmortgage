@@ -305,10 +305,15 @@ exports.addLoan = async (req, res) => {
   } = req.body;
 
   try {
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Role not authorized." });
+    }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     const newLoan = new LoanApplication({
       userId,
       step1,
@@ -322,6 +327,7 @@ exports.addLoan = async (req, res) => {
       step9,
       status: status || "pending",
     });
+
     await newLoan.save();
 
     res.status(201).json({
@@ -333,6 +339,31 @@ exports.addLoan = async (req, res) => {
   }
 };
 
+// exports.cloneLoanApplication = async (req, res) => {
+//   const { loanId } = req.params;
+
+//   try {
+//     const loanToClone = await LoanApplication.findById(loanId);
+//     if (!loanToClone) {
+//       return res.status(404).json({ message: "Loan application not found" });
+//     }
+//     const clonedLoan = new LoanApplication({
+//       ...loanToClone.toObject(),
+//       status: "pending",
+//       assignedLoanOfficer: null,
+//     });
+//     await clonedLoan.save();
+
+//     res.status(201).json({
+//       message: "Loan application cloned successfully",
+//       loan: clonedLoan,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
 exports.cloneLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -341,6 +372,12 @@ exports.cloneLoanApplication = async (req, res) => {
     if (!loanToClone) {
       return res.status(404).json({ message: "Loan application not found" });
     }
+
+    // Allow Admin or Loan Officer to clone
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
     const clonedLoan = new LoanApplication({
       ...loanToClone.toObject(),
       status: "pending",
@@ -358,6 +395,32 @@ exports.cloneLoanApplication = async (req, res) => {
   }
 };
 
+// exports.closeLoanApplication = async (req, res) => {
+//   const { loanId } = req.params;
+
+//   try {
+//     const loan = await LoanApplication.findById(loanId);
+//     if (!loan) {
+//       return res.status(404).json({ message: "Loan application not found" });
+//     }
+//     loan.status = "closed";
+//     await loan.save();
+
+//     //notification LOC
+//     await createNotification(null, 'Admin', `Loan application ${loanId} has been closed.`);
+//     await createNotification(loan.userId, 'User', 'Your loan application has been closed successfully.');
+//     //end
+
+//     res.status(200).json({
+//       message: "Loan application closed successfully",
+//       loan,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
 exports.closeLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -366,13 +429,18 @@ exports.closeLoanApplication = async (req, res) => {
     if (!loan) {
       return res.status(404).json({ message: "Loan application not found" });
     }
+
+    // Ensure only Admin or Loan Officer can close
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
     loan.status = "closed";
     await loan.save();
 
-    //notification LOC
-    await createNotification(null, 'Admin', `Loan application ${loanId} has been closed.`);
-    await createNotification(loan.userId, 'User', 'Your loan application has been closed successfully.');
-    //end
+    // Notification Logic
+    await createNotification(null, "Admin", `Loan application ${loanId} has been closed.`);
+    await createNotification(loan.userId, "User", "Your loan application has been closed successfully.");
 
     res.status(200).json({
       message: "Loan application closed successfully",
@@ -384,6 +452,32 @@ exports.closeLoanApplication = async (req, res) => {
   }
 };
 
+// exports.suspendLoanApplication = async (req, res) => {
+//   const { loanId } = req.params;
+
+//   try {
+//     const loan = await LoanApplication.findById(loanId);
+//     if (!loan) {
+//       return res.status(404).json({ message: "Loan application not found" });
+//     }
+//     loan.status = "suspended";
+//     await loan.save();
+
+//     //notifications LOC
+//     await createNotification(null, 'Admin', `Loan application ${loanId} has been suspended.`);
+//     await createNotification(loan.userId, 'User', 'Your loan application has been suspended.');
+//     //end
+
+//     res.status(200).json({
+//       message: "Loan application suspended successfully",
+//       loan,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
 exports.suspendLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -392,13 +486,18 @@ exports.suspendLoanApplication = async (req, res) => {
     if (!loan) {
       return res.status(404).json({ message: "Loan application not found" });
     }
+
+    // Ensure only Admin or Loan Officer can suspend
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
     loan.status = "suspended";
     await loan.save();
 
-    //notifications LOC
-    await createNotification(null, 'Admin', `Loan application ${loanId} has been suspended.`);
-    await createNotification(loan.userId, 'User', 'Your loan application has been suspended.');
-    //end
+    // Notifications
+    await createNotification(null, "Admin", `Loan application ${loanId} has been suspended.`);
+    await createNotification(loan.userId, "User", "Your loan application has been suspended.");
 
     res.status(200).json({
       message: "Loan application suspended successfully",
