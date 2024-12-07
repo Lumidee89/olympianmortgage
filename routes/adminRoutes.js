@@ -4,7 +4,7 @@ const adminController = require("../controllers/adminController");
 const loanApplicationController = require("../controllers/loanApplicationController");
 const leadController = require("../controllers/leadController");
 const authController = require("../controllers/authController");
-const verifyToken = require("../middlewares/authMiddleware");
+const { verifyToken, isAdminOrLoanOfficer } = require("../middlewares/authMiddleware");
 
 router.post("/register", adminController.registerAdmin);
 router.post("/login", adminController.loginAdmin);
@@ -14,9 +14,9 @@ router.post(
 
   loanApplicationController.assignLoanOfficer
 );
-router.get("/loans", verifyToken, adminController.getLoans);
+router.get("/loans", verifyToken, isAdminOrLoanOfficer, adminController.getLoans);
 
-router.post("/add-loan", verifyToken, loanApplicationController.addLoan);
+router.post("/add-loan", verifyToken, isAdminOrLoanOfficer, loanApplicationController.addLoan);
 
 // Ibrahim
 router.get(
@@ -33,22 +33,26 @@ router.get(
 
 router.get("/user/:userId", verifyToken, adminController.getUserDetailsById);
 
-router.post("/add-lead", verifyToken, leadController.addLead);
-router.get("/leads", verifyToken, leadController.getLeads);
+router.post("/add-lead", verifyToken, isAdminOrLoanOfficer, leadController.addLead);
+router.get("/leads", verifyToken, isAdminOrLoanOfficer, leadController.getLeads);
+
 
 router.post(
-  "/clone-loan/:loanId",
+  "/clone-loan-application/:loanId",
   verifyToken,
+  isAdminOrLoanOfficer,
   loanApplicationController.cloneLoanApplication
 );
 router.post(
-  "/close-loan/:loanId",
+  "/close-loan-application/:loanId",
   verifyToken,
+  isAdminOrLoanOfficer,
   loanApplicationController.closeLoanApplication
 );
 router.post(
-  "/suspend-loan/:loanId",
+  "/suspend-loan-application/:loanId",
   verifyToken,
+  isAdminOrLoanOfficer,
   loanApplicationController.suspendLoanApplication
 );
 

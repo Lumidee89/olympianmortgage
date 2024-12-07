@@ -125,7 +125,19 @@ const LoanApplicationSchema = new Schema({
       bankStatements: String,
       profitAndLossStatements: String,
     },
+    categories: [
+      {
+        name: String, 
+        documents: [
+          {
+            filename: String, 
+            uploadedAt: { type: Date, default: Date.now },
+          },
+        ],
+      },
+    ],
   },
+  
   status: { type: String, default: "pending" },
   assignedLoanOfficer: { type: Schema.Types.ObjectId, ref: "Admin" },
   createdAt: { type: Date, default: Date.now },

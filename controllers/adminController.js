@@ -6,6 +6,19 @@ const Loan = require("../models/LoanApplication");
 const config = require("../config/config");
 const User = require("../models/User");
 const LoanApplication = require("../models/LoanApplication");
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); 
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); 
+  },
+});
+
+const upload = multer({ storage });
 
 exports.registerAdmin = async (req, res) => {
   const { name, email, password } = req.body;
@@ -244,3 +257,55 @@ exports.disableUser = async (req, res) => {
     return res.status(500).json({ message: "Error disabling user", error });
   }
 };
+
+// exports.updateAdminProfile = async (req, res) => {
+//   const { name, email, phone, country, city, state, address } = req.body;
+//   const profilePicture = req.file ? req.file.path : null;  
+
+//   try {
+//     const admin = await Admin.findById(req.adminId);
+
+//     if (!admin) {
+//       return res.status(404).json({ message: "Admin not found." });
+//     }
+
+//     admin.name = name || admin.name;
+//     admin.email = email || admin.email;
+//     admin.phone = phone || admin.phone;
+//     admin.country = country || admin.country;
+//     admin.city = city || admin.city;
+//     admin.state = state || admin.state;
+//     admin.address = address || admin.address;
+//     if (profilePicture) {
+//       admin.profilePicture = profilePicture;  
+//     }
+
+//     await admin.save();
+
+//     res.status(200).json({
+//       message: "Admin profile updated successfully",
+//       admin,
+//     });
+//   } catch (error) {
+//     console.error("Error updating admin profile:", error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
+// exports.getAdminProfile = async (req, res) => {
+//   try {
+//     const admin = await Admin.findById(req.adminId);
+    
+//     if (!admin) {
+//       return res.status(404).json({ message: "Admin not found." });
+//     }
+
+//     res.status(200).json({
+//       message: "Admin profile fetched successfully",
+//       admin,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching admin profile:", error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };

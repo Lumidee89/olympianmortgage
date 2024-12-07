@@ -2,8 +2,8 @@
 const mongoose = require('mongoose');
 
 const chatMessageSchema = new mongoose.Schema({
-    senderId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' }, // Reference to the user
-    loanOfficerId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LoanOfficer' }, // Reference to the loan officer
+    senderId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    loanOfficerId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LoanOfficer' },
     message: { type: String, required: true },
     timestamp: { type: Date, default: Date.now }
 });

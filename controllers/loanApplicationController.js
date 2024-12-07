@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const LoanApplication = require("../models/LoanApplication");
+const { createNotification } = require('../controllers/notificationController');
 const User = require("../models/User");
 require("dotenv").config();
 const axios = require("axios");
@@ -25,6 +26,11 @@ exports.createLoanApplication = async (req, res) => {
     });
 
     await newLoanApplication.save();
+
+    //notification LOC
+    await createNotification(null, 'Admin', 'A new loan application has been created by a user.');
+    await createNotification(userId, 'User', 'Your loan application has been successfully created.');
+    //end
 
     res.status(201).json({
       message: "Loan application created successfully",
@@ -77,6 +83,11 @@ exports.editLoanApplication = async (req, res) => {
 
     // Save the updated loan application
     await loanApplication.save();
+
+    //notifications LOC
+    await createNotification(null, 'Admin', `A loan application has been updated by user ${userId}.`);
+    await createNotification(userId, 'User', 'Your loan application has been updated successfully.' );
+    //end
 
     res.status(200).json({ message: "Loan application updated successfully" });
   } catch (error) {
@@ -151,6 +162,12 @@ exports.assignLoanOfficer = async (req, res) => {
 
     await loanApplication.save();
 
+    //notifications LOC
+    await createNotification(null, 'Admin', `A loan officer has been assigned to loan application ${loanApplicationId}.`);
+    await createNotification(loanOfficerId, 'User', `You have been assigned to a loan application.`);
+    await createNotification(loanApplication.userId, 'User', 'A loan officer has been assigned to your application.');
+    //end
+
     res.status(200).json({
       message:
         "Loan officer assigned successfully and status updated to approved",
@@ -167,32 +184,57 @@ exports.uploadDocuments = [
   ]),
   async (req, res) => {
     try {
-      const { loanApplicationId } = req.body;
+      const { loanApplicationId, category } = req.body;
 
-      // Fetch the loan application document by ID
       const loanApplication = await LoanApplication.findById(loanApplicationId);
 
       if (!loanApplication) {
         return res.status(404).json({ message: "Loan application not found" });
       }
 
-      // Update the step9 documents with uploaded file paths
-      loanApplication.step9 = {
-        documents: {
+      const uploadedFiles = [];
+
+      if (req.files["bankStatements"]) {
+        uploadedFiles.push({
+          filename: req.files["bankStatements"][0].path,
+          uploadedAt: new Date(),
+        });
+      }
+
+      if (req.files["profitAndLossStatements"]) {
+        uploadedFiles.push({
+          filename: req.files["profitAndLossStatements"][0].path,
+          uploadedAt: new Date(),
+        });
+      }
+
+      if (category) {
+
+        let categoryObj = loanApplication.step9.categories.find(
+          (cat) => cat.name === category
+        );
+
+        if (!categoryObj) {
+
+          categoryObj = { name: category, documents: [] };
+          loanApplication.step9.categories.push(categoryObj);
+        }
+
+        categoryObj.documents.push(...uploadedFiles);
+      } else {
+
+        loanApplication.step9.documents = {
           bankStatements: req.files["bankStatements"]
             ? req.files["bankStatements"][0].path
             : null,
           profitAndLossStatements: req.files["profitAndLossStatements"]
             ? req.files["profitAndLossStatements"][0].path
             : null,
-        },
-      };
+        };
+      }
 
-      // Update the current stage to 2
-      // - Ibrahim
       loanApplication.currentStage = 2;
 
-      // Save the updated loan application
       await loanApplication.save();
 
       res
@@ -203,6 +245,28 @@ exports.uploadDocuments = [
     }
   },
 ];
+
+exports.getUserDocuments = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const loanApplications = await LoanApplication.find({ userId });
+
+    if (!loanApplications.length) {
+      return res.status(404).json({ message: "No documents found" });
+    }
+
+    const documents = loanApplications.map((application) => ({
+      loanApplicationId: application._id,
+      documents: application.step9.documents,
+      categories: application.step9.categories,
+    }));
+
+    res.status(200).json({ documents });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching documents", error });
+  }
+};
 
 const getLoanOffersFromArive = async (loanApplicationData) => {
   try {
@@ -241,10 +305,15 @@ exports.addLoan = async (req, res) => {
   } = req.body;
 
   try {
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Role not authorized." });
+    }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     const newLoan = new LoanApplication({
       userId,
       step1,
@@ -258,6 +327,7 @@ exports.addLoan = async (req, res) => {
       step9,
       status: status || "pending",
     });
+
     await newLoan.save();
 
     res.status(201).json({
@@ -269,6 +339,31 @@ exports.addLoan = async (req, res) => {
   }
 };
 
+// exports.cloneLoanApplication = async (req, res) => {
+//   const { loanId } = req.params;
+
+//   try {
+//     const loanToClone = await LoanApplication.findById(loanId);
+//     if (!loanToClone) {
+//       return res.status(404).json({ message: "Loan application not found" });
+//     }
+//     const clonedLoan = new LoanApplication({
+//       ...loanToClone.toObject(),
+//       status: "pending",
+//       assignedLoanOfficer: null,
+//     });
+//     await clonedLoan.save();
+
+//     res.status(201).json({
+//       message: "Loan application cloned successfully",
+//       loan: clonedLoan,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
 exports.cloneLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -277,6 +372,12 @@ exports.cloneLoanApplication = async (req, res) => {
     if (!loanToClone) {
       return res.status(404).json({ message: "Loan application not found" });
     }
+
+    // Allow Admin or Loan Officer to clone
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
     const clonedLoan = new LoanApplication({
       ...loanToClone.toObject(),
       status: "pending",
@@ -294,6 +395,32 @@ exports.cloneLoanApplication = async (req, res) => {
   }
 };
 
+// exports.closeLoanApplication = async (req, res) => {
+//   const { loanId } = req.params;
+
+//   try {
+//     const loan = await LoanApplication.findById(loanId);
+//     if (!loan) {
+//       return res.status(404).json({ message: "Loan application not found" });
+//     }
+//     loan.status = "closed";
+//     await loan.save();
+
+//     //notification LOC
+//     await createNotification(null, 'Admin', `Loan application ${loanId} has been closed.`);
+//     await createNotification(loan.userId, 'User', 'Your loan application has been closed successfully.');
+//     //end
+
+//     res.status(200).json({
+//       message: "Loan application closed successfully",
+//       loan,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
 exports.closeLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -302,8 +429,19 @@ exports.closeLoanApplication = async (req, res) => {
     if (!loan) {
       return res.status(404).json({ message: "Loan application not found" });
     }
+
+    // Ensure only Admin or Loan Officer can close
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
     loan.status = "closed";
     await loan.save();
+
+    // Notification Logic
+    await createNotification(null, "Admin", `Loan application ${loanId} has been closed.`);
+    await createNotification(loan.userId, "User", "Your loan application has been closed successfully.");
+
     res.status(200).json({
       message: "Loan application closed successfully",
       loan,
@@ -314,6 +452,32 @@ exports.closeLoanApplication = async (req, res) => {
   }
 };
 
+// exports.suspendLoanApplication = async (req, res) => {
+//   const { loanId } = req.params;
+
+//   try {
+//     const loan = await LoanApplication.findById(loanId);
+//     if (!loan) {
+//       return res.status(404).json({ message: "Loan application not found" });
+//     }
+//     loan.status = "suspended";
+//     await loan.save();
+
+//     //notifications LOC
+//     await createNotification(null, 'Admin', `Loan application ${loanId} has been suspended.`);
+//     await createNotification(loan.userId, 'User', 'Your loan application has been suspended.');
+//     //end
+
+//     res.status(200).json({
+//       message: "Loan application suspended successfully",
+//       loan,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
 exports.suspendLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -322,8 +486,19 @@ exports.suspendLoanApplication = async (req, res) => {
     if (!loan) {
       return res.status(404).json({ message: "Loan application not found" });
     }
+
+    // Ensure only Admin or Loan Officer can suspend
+    if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
     loan.status = "suspended";
     await loan.save();
+
+    // Notifications
+    await createNotification(null, "Admin", `Loan application ${loanId} has been suspended.`);
+    await createNotification(loan.userId, "User", "Your loan application has been suspended.");
+
     res.status(200).json({
       message: "Loan application suspended successfully",
       loan,

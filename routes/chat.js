@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const chatController = require('../controllers/chatController');
-const verifyToken = require('../middlewares/authMiddleware'); 
+const { verifyToken, isAdminOrLoanOfficer } = require("../middlewares/authMiddleware");
 
 router.post('/send', verifyToken, chatController.sendMessage);
 
