@@ -449,9 +449,7 @@ exports.updateESignDocuments = async (req, res) => {
   const { documentType } = req.body;
 
   if (!documentType) {
-    return res
-      .status(400)
-      .json({ error: "Document type and URL are required." });
+    return res.status(400).json({ error: "Document type is required." });
   }
 
   try {
@@ -461,17 +459,32 @@ exports.updateESignDocuments = async (req, res) => {
       return res.status(404).json({ error: "Loan application not found." });
     }
 
+    // Update the document  to true
     loanApplication.loanDocuments[documentType] = true;
+
+    // Check if both loanAgreements and deedOfTrust are true
+    const { loanAgreements, deedOfTrust } = loanApplication.loanDocuments;
+    if (loanAgreements && deedOfTrust) {
+      loanApplication.currentStage = 4;
+    }
+
+    // Check if both appraisal and PorL are true or pressent
+    const { appraisal } = loanApplication.loanDocuments;
+    const { profitAndLossStatements } = loanApplication.step9.documents;
+    if (appraisal && profitAndLossStatements) {
+      loanApplication.currentStage = 5;
+    }
+
     await loanApplication.save();
 
     res.status(200).json({
-      message: "Document Signed updated successfully.",
+      message: "Document signed updated successfully.",
       loanApplication,
     });
   } catch (error) {
     console.error(error);
     res
       .status(500)
-      .json({ error: "Server error. Unable to update document Signed." });
+      .json({ error: "Server error. Unable to update document signed." });
   }
 };
