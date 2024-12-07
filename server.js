@@ -10,6 +10,7 @@ const chatRoutes = require("./routes/chat");
 const contentRoutes = require('./routes/contentRoutes');
 const notificationRoutes = require('./routes/notification');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use("/api/chat", chatRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/contacts', contactRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
