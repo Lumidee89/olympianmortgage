@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const contactSchema = new mongoose.Schema({
+const contactSchema = new mongoose.Schema(
+  {
     email: { type: String, required: true },
     contactType: { type: String, required: true },
     firstName: { type: String, required: true },
@@ -18,7 +19,9 @@ const contactSchema = new mongoose.Schema({
     cellPhone: { type: String },
     homePhone: { type: String },
     fax: { type: String },
-    loanOfficerId: { type: mongoose.Schema.Types.ObjectId, ref: 'LoanOfficer' },
-}, { timestamps: true });
+    loanOfficerId: { type: mongoose.Schema.Types.ObjectId, ref: "LoanOfficer" },
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('Contact', contactSchema);
+module.exports = mongoose.model("Contact", contactSchema);
