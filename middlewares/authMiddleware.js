@@ -15,6 +15,8 @@ const verifyToken = (req, res, next) => {
       return res.status(401).json({ message: "Failed to authenticate token." });
     }
 
+    console.log("Decoded Token:", decoded); 
+
     req.userRole = decoded.role;
     if (decoded.role === "admin") {
       req.adminId = decoded.adminId;

@@ -1,16 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
+const { adminRegister, adminLogin } = require("../controllers/authController");
 const loanApplicationController = require("../controllers/loanApplicationController");
 const leadController = require("../controllers/leadController");
 const authController = require("../controllers/authController");
-const {
-  verifyToken,
-  isAdminOrLoanOfficer,
-} = require("../middlewares/authMiddleware");
+const {verifyToken, isAdminOrLoanOfficer} = require("../middlewares/authMiddleware");
 
-router.post("/register", adminController.registerAdmin);
-router.post("/login", adminController.loginAdmin);
+router.post("/register", adminRegister);
+router.post("/login", adminLogin);
 router.post("/add-loan-officer", adminController.addLoanOfficer);
 router.post(
   "/assign-loan-officer",

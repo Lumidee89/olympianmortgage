@@ -28,16 +28,16 @@ exports.createLoanApplication = async (req, res) => {
     await newLoanApplication.save();
 
     //notification LOC
-    await createNotification(
-      null,
-      "Admin",
-      "A new loan application has been created by a user."
-    );
-    await createNotification(
-      userId,
-      "User",
-      "Your loan application has been successfully created."
-    );
+    // await createNotification(
+    //   null,
+    //   "Admin",
+    //   "A new loan application has been created by a user."
+    // );
+    // await createNotification(
+    //   userId,
+    //   "User",
+    //   "Your loan application has been successfully created."
+    // );
     //end
 
     res.status(201).json({
@@ -179,26 +179,26 @@ exports.assignLoanOfficer = async (req, res) => {
     await loanApplication.save();
 
     //notifications LOC
-    await createNotification(
-      null,
-      "Admin",
-      `A loan officer has been assigned to loan application ${loanApplicationId}.`
-    );
-    await createNotification(
-      loanOfficerId,
-      "User",
-      `You have been assigned to a loan application.`
-    );
-    await createNotification(
-      loanApplication.userId,
-      "User",
-      "A loan officer has been assigned to your application."
-    );
+    // await createNotification(
+    //   null,
+    //   "Admin",
+    //   `A loan officer has been assigned to loan application ${loanApplicationId}.`
+    // );
+    // await createNotification(
+    //   loanOfficerId,
+    //   "User",
+    //   `You have been assigned to a loan application.`
+    // );
+    // await createNotification(
+    //   loanApplication.userId,
+    //   "User",
+    //   "A loan officer has been assigned to your application."
+    // );
     //end
 
     res.status(200).json({
       message:
-        "Loan officer assigned successfully and status updated to approved",
+        "Loan officer assigned successfully",
     });
   } catch (error) {
     res.status(500).json({ message: "Error assigning loan officer", error });
@@ -366,31 +366,6 @@ exports.addLoan = async (req, res) => {
   }
 };
 
-// exports.cloneLoanApplication = async (req, res) => {
-//   const { loanId } = req.params;
-
-//   try {
-//     const loanToClone = await LoanApplication.findById(loanId);
-//     if (!loanToClone) {
-//       return res.status(404).json({ message: "Loan application not found" });
-//     }
-//     const clonedLoan = new LoanApplication({
-//       ...loanToClone.toObject(),
-//       status: "pending",
-//       assignedLoanOfficer: null,
-//     });
-//     await clonedLoan.save();
-
-//     res.status(201).json({
-//       message: "Loan application cloned successfully",
-//       loan: clonedLoan,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };
-
 exports.cloneLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -424,32 +399,6 @@ exports.cloneLoanApplication = async (req, res) => {
   }
 };
 
-// exports.closeLoanApplication = async (req, res) => {
-//   const { loanId } = req.params;
-
-//   try {
-//     const loan = await LoanApplication.findById(loanId);
-//     if (!loan) {
-//       return res.status(404).json({ message: "Loan application not found" });
-//     }
-//     loan.status = "closed";
-//     await loan.save();
-
-//     //notification LOC
-//     await createNotification(null, 'Admin', `Loan application ${loanId} has been closed.`);
-//     await createNotification(loan.userId, 'User', 'Your loan application has been closed successfully.');
-//     //end
-
-//     res.status(200).json({
-//       message: "Loan application closed successfully",
-//       loan,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };
-
 exports.closeLoanApplication = async (req, res) => {
   const { loanId } = req.params;
 
@@ -470,16 +419,16 @@ exports.closeLoanApplication = async (req, res) => {
     await loan.save();
 
     // Notification Logic
-    await createNotification(
-      null,
-      "Admin",
-      `Loan application ${loanId} has been closed.`
-    );
-    await createNotification(
-      loan.userId,
-      "User",
-      "Your loan application has been closed successfully."
-    );
+    // await createNotification(
+    //   null,
+    //   "Admin",
+    //   `Loan application ${loanId} has been closed.`
+    // );
+    // await createNotification(
+    //   loan.userId,
+    //   "User",
+    //   "Your loan application has been closed successfully."
+    // );
 
     res.status(200).json({
       message: "Loan application closed successfully",
@@ -490,32 +439,6 @@ exports.closeLoanApplication = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
-// exports.suspendLoanApplication = async (req, res) => {
-//   const { loanId } = req.params;
-
-//   try {
-//     const loan = await LoanApplication.findById(loanId);
-//     if (!loan) {
-//       return res.status(404).json({ message: "Loan application not found" });
-//     }
-//     loan.status = "suspended";
-//     await loan.save();
-
-//     //notifications LOC
-//     await createNotification(null, 'Admin', `Loan application ${loanId} has been suspended.`);
-//     await createNotification(loan.userId, 'User', 'Your loan application has been suspended.');
-//     //end
-
-//     res.status(200).json({
-//       message: "Loan application suspended successfully",
-//       loan,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };
 
 exports.suspendLoanApplication = async (req, res) => {
   const { loanId } = req.params;
@@ -537,16 +460,16 @@ exports.suspendLoanApplication = async (req, res) => {
     await loan.save();
 
     // Notifications
-    await createNotification(
-      null,
-      "Admin",
-      `Loan application ${loanId} has been suspended.`
-    );
-    await createNotification(
-      loan.userId,
-      "User",
-      "Your loan application has been suspended."
-    );
+    // await createNotification(
+    //   null,
+    //   "Admin",
+    //   `Loan application ${loanId} has been suspended.`
+    // );
+    // await createNotification(
+    //   loan.userId,
+    //   "User",
+    //   "Your loan application has been suspended."
+    // );
 
     res.status(200).json({
       message: "Loan application suspended successfully",
@@ -710,5 +633,63 @@ exports.updateESignDocuments = async (req, res) => {
     res
       .status(500)
       .json({ error: "Server error. Unable to update document signed." });
+  }
+};
+
+exports.getLoanApplicationsForOfficer = async (req, res) => {
+  try {
+    const { loanOfficerId } = req;
+
+    if (!loanOfficerId) {
+      return res.status(400).json({ message: "Loan officer ID is required." });
+    }
+
+    const loanApplications = await LoanApplication.find({
+      assignedTo: loanOfficerId,
+    });
+
+    res.status(200).json({ loanApplications });
+  } catch (error) {
+    console.error("Error fetching loan applications:", error);
+    res.status(500).json({
+      message: "Error fetching loan applications assigned to loan officer",
+      error,
+    });
+  }
+};
+
+exports.approveLoanApplication = async (req, res) => {
+  try {
+    const loanOfficerId = req.loanOfficerId;
+    const { loanApplicationId } = req.body;
+
+    if (!loanApplicationId) {
+      return res.status(400).json({ message: "Loan application ID is required." });
+    }
+
+    const loanApplication = await LoanApplication.findOne({
+      _id: loanApplicationId,
+      assignedTo: loanOfficerId,
+    });
+
+    if (!loanApplication) {
+      return res.status(404).json({
+        message: "Loan application not found or not assigned to you.",
+      });
+    }
+
+    loanApplication.status = "approved";
+    await loanApplication.save();
+
+    res.status(200).json({
+      message: "Loan application approved successfully.",
+      loanApplication,
+    });
+  } catch (error) {
+    console.error("Error approving loan application:", error);
+    res.status(500).json({
+      message: "Error approving loan application",
+      error,
+    });
   }
 };

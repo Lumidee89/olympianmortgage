@@ -20,83 +20,116 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-exports.registerAdmin = async (req, res) => {
-  const { name, email, password, phone, country, city, state, address } = req.body;
+// exports.registerAdmin = async (req, res) => {
+//   const { name, email, password, phone, profilePicture, country, city, state, address } = req.body;
 
-  try {
-    const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin) {
-      return res.status(400).json({ message: "Admin already exists" });
-    }
+//   try {
+//     // Check if the admin already exists
+//     const existingAdmin = await Admin.findOne({ email });
+//     if (existingAdmin) {
+//       return res.status(400).json({ message: "Admin already exists" });
+//     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const admin = new Admin({
-      name,
-      email,
-      password: hashedPassword,
-      phone,
-      country,
-      city,
-      state,
-      address,
-      role: "admin", 
-    });
+//     // Create a new admin user
+//     const admin = new Admin({
+//       name,
+//       email,
+//       password: hashedPassword,
+//       phone,
+//       profilePicture,
+//       country,
+//       city,
+//       state,
+//       address,
+//       role: "admin", // Always set the role to admin
+//     });
 
-    await admin.save();
+//     // Save the new admin
+//     await admin.save();
 
-    const token = jwt.sign({ adminId: admin._id, role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
+//     res.status(201).json({
+//       message: "Admin registered successfully",
+//       admin: {
+//         name: admin.name,
+//         email: admin.email,
+//         phone: admin.phone,
+//         profilePicture: admin.profilePicture,
+//         country: admin.country,
+//         city: admin.city,
+//         state: admin.state,
+//         address: admin.address,
+//         role: admin.role,
+//       },
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 
-    res.status(201).json({message: "Admin registered successfully", token, admin: {id: admin._id, name: admin.name, email: admin.email, role: admin.role, },});
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error });
-  }
-};
+// // Admin login route
+// exports.loginAdmin = async (req, res) => {
+//   const { email, password } = req.body;
 
-exports.loginAdmin = async (req, res) => {
-  const { email, password } = req.body;
+//   try {
+//     // Find admin by email
+//     const admin = await Admin.findOne({ email });
+//     if (!admin) {
+//       return res.status(401).json({ message: "Invalid email or password" });
+//     }
 
-  try {
-    const admin = await Admin.findOne({ email });
-    if (!admin) {
-      return res.status(404).json({ message: "Admin not found" });
-    }
-    const isMatch = await admin.matchPassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-    const token = jwt.sign(
-      {
-        adminId: admin._id,
-        role: "admin",
-      },
-      config.jwt.secret || process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        name: admin.name,
-        email: admin.email,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+//     // Check if the password matches
+//     const isMatch = await bcrypt.compare(password, admin.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: "Invalid email or password" });
+//     }
+
+//     // Update the lastLogin field
+//     admin.lastLogin = new Date();
+//     await admin.save();
+
+//     // Generate JWT token
+//     const token = jwt.sign(
+//       { adminId: admin._id, role: admin.role },
+//       config.jwt.secret || process.env.JWT_SECRET,
+//       { expiresIn: "1h" }
+//     );
+
+//     // Respond with the token and admin details
+//     res.status(200).json({
+//       token,
+//       admin: {
+//         name: admin.name,
+//         email: admin.email,
+//         phone: admin.phone,
+//         profilePicture: admin.profilePicture,
+//         country: admin.country,
+//         city: admin.city,
+//         state: admin.state,
+//         address: admin.address,
+//         role: admin.role,
+//       },
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Login failed", error });
+//   }
+// };
 
 exports.addLoanOfficer = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const newLoanOfficer = new LoanOfficer({
       name,
       email,
       phone,
       password: hashedPassword,
+      role: "loan_officer", 
     });
 
     await newLoanOfficer.save();

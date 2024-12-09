@@ -15,8 +15,11 @@ exports.loginLoanOfficer = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign(
-      { loanOfficerId: loanOfficer._id, role: 'loan_officer' },
-      config.jwt.secret,
+      {
+        role: "loan_officer",
+        loanOfficerId: loanOfficer.id,
+      },
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 

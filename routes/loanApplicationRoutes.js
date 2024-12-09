@@ -33,5 +33,7 @@ router.get("/:loanApplicationId", verifyToken, loanApplicationController.getLoan
 // Fetch loans based on status
 router.get("/:loan-applications", verifyToken, loanApplicationController.getLoansBasedonStatus);
 router.get( "/user-documents", verifyToken, loanApplicationController.getUserDocuments);
+router.get("/assigned", verifyToken, isAdminOrLoanOfficer, loanApplicationController.getLoanApplicationsForOfficer);
+router.put("/approve", verifyToken, isAdminOrLoanOfficer, loanApplicationController.approveLoanApplication);
 
 module.exports = router;

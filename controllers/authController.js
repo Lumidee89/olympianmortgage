@@ -311,3 +311,77 @@ exports.getUserProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.adminRegister = async (req, res) => {
+  const { firstname, lastname, email, phoneNumber, password } = req.body;
+  try {
+    const existingAdmin = await User.findOne({ email, role: "admin" });
+    if (existingAdmin) {
+      return res.status(400).json({ message: "Admin already exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const admin = new User({
+      firstname,
+      lastname,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+      otp: otp,
+      otpExpiry: Date.now() + 15 * 60 * 1000,
+      isVerified: false,
+      role: "admin", 
+    });
+    await admin.save();
+    await transporter.sendMail({
+      from: `"Support" <${config.smtp.auth.user}>`,
+      to: email,
+      subject: "Account Verification OTP",
+      text: `Your OTP for account verification is ${otp}. It is valid for 15 minutes.`,
+    });
+    res.status(201).json({
+      message: "Admin registered successfully! OTP sent to your email.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const admin = await User.findOne({ email, role: "admin" });
+    if (!admin) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    admin.lastLogin = new Date();
+    await admin.save();
+
+    const token = jwt.sign(
+      { userId: admin._id, role: admin.role },
+      config.jwt.secret || process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({
+      token,
+      user: {
+        firstname: admin.firstname,
+        lastname: admin.lastname,
+        email: admin.email,
+        id: admin._id,
+        phoneNumber: admin.phoneNumber,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Login failed", error });
+  }
+};

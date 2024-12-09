@@ -11,7 +11,10 @@ const AdminSchema = new mongoose.Schema({
   city: { type: String },
   state: { type: String },
   address: { type: String },
-  role: { type: String, default: "admin" },
+  role: { type: String, default: 'admin' },
+  createdAt: { type: Date, default: Date.now },
+  lastLogin: { type: Date, default: null },
+  updatedAt: { type: Date, default: null },
 });
 
 AdminSchema.pre('save', async function(next) {
