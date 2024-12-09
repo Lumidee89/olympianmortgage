@@ -21,26 +21,35 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 exports.registerAdmin = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, phone, country, city, state, address } = req.body;
 
   try {
-    let admin = await Admin.findOne({ email });
-    if (admin) {
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
       return res.status(400).json({ message: "Admin already exists" });
     }
 
-    admin = new Admin({ name, email, password });
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const admin = new Admin({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      country,
+      city,
+      state,
+      address,
+      role: "admin", 
+    });
+
     await admin.save();
 
-    const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ adminId: admin._id, role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    res.status(201).json({
-      message: "Admin registered successfully",
-      token,
-    });
+    res.status(201).json({message: "Admin registered successfully", token, admin: {id: admin._id, name: admin.name, email: admin.email, role: admin.role, },});
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error", error });
   }
 };
