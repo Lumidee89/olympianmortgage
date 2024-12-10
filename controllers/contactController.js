@@ -10,7 +10,7 @@ exports.createContact = async (req, res) => {
       suffix,
       license,
       company,
-      licenseStatus,
+      licenseState, 
       dob,
       secondaryEmail,
       workPhone,
@@ -27,6 +27,8 @@ exports.createContact = async (req, res) => {
         ? req.loanOfficerId
         : req.body.loanOfficerId;
 
+    const profilePicture = req.file ? req.file.path : null;
+
     const newContact = new Contact({
       email,
       contactType,
@@ -35,7 +37,7 @@ exports.createContact = async (req, res) => {
       suffix,
       license,
       company,
-      licenseStatus,
+      licenseState,
       dob,
       secondaryEmail,
       workPhone,
@@ -46,6 +48,7 @@ exports.createContact = async (req, res) => {
       homePhone,
       fax,
       loanOfficerId,
+      profilePicture,
     });
 
     await newContact.save();
@@ -61,6 +64,10 @@ exports.updateContact = async (req, res) => {
   try {
     const { contactId } = req.params;
     const updatedData = req.body;
+
+    if (req.file) {
+      updatedData.profilePicture = req.file.path;
+    }
 
     const contact = await Contact.findById(contactId);
 

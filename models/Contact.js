@@ -9,6 +9,7 @@ const contactSchema = new mongoose.Schema(
     suffix: { type: String },
     license: { type: String },
     company: { type: String },
+    licenseState: { type: String },
     licenseStatus: { type: String },
     dob: { type: Date },
     secondaryEmail: { type: String },
@@ -19,6 +20,7 @@ const contactSchema = new mongoose.Schema(
     cellPhone: { type: String },
     homePhone: { type: String },
     fax: { type: String },
+    profilePicture: { type: String },
     loanOfficerId: { type: mongoose.Schema.Types.ObjectId, ref: "LoanOfficer" },
   },
   { timestamps: true }

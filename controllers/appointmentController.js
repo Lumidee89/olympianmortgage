@@ -88,3 +88,108 @@ exports.respondToAppointment = async (req, res) => {
         res.status(500).json({ message: 'Error responding to appointment', error: error.message || error });
     }
 };
+
+exports.deleteAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const userRole = req.userRole;
+    const userId = req.userId;
+    const loanOfficerId = req.loanOfficerId;
+    const adminId = req.adminId;
+
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' });
+    }
+
+    if (userRole === 'user') {
+      if (appointment.userId.toString() !== userId.toString()) {
+        return res.status(403).json({ message: 'You are not authorized to delete this appointment.' });
+      }
+    } else if (userRole === 'loan_officer') {
+      return res.status(403).json({ message: 'Loan officers are not authorized to delete appointments.' });
+    } else if (userRole === 'admin') {
+    } else {
+      return res.status(403).json({ message: 'Access denied. Invalid role.' });
+    }
+
+    await appointment.deleteOne();
+
+    res.status(200).json({ message: 'Appointment deleted successfully.' });
+
+  } catch (error) {
+    console.error('Error deleting appointment:', error);
+    res.status(500).json({ message: 'Error deleting appointment', error });
+  }
+};
+
+exports.getUpcomingAppointments = async (req, res) => {
+  try {
+    const userRole = req.userRole;
+    const userId = req.userId;
+    const loanOfficerId = req.loanOfficerId;
+
+    const currentDate = new Date();
+
+    let appointments;
+
+    if (userRole === 'user') {
+      appointments = await Appointment.find({
+        userId,
+        appointmentDate: { $gte: currentDate },
+      }).populate('loanOfficerId');
+    } else if (userRole === 'loan_officer') {
+      appointments = await Appointment.find({
+        loanOfficerId,
+        appointmentDate: { $gte: currentDate },
+      }).populate('userId');
+    } else if (userRole === 'admin') {
+      appointments = await Appointment.find({
+        appointmentDate: { $gte: currentDate },
+      }).populate('userId').populate('loanOfficerId');
+    } else {
+      return res.status(403).json({ message: 'Access denied. Invalid role.' });
+    }
+
+    res.status(200).json({ appointments });
+  } catch (error) {
+    console.error('Error fetching upcoming appointments:', error);
+    res.status(500).json({ message: 'Error fetching upcoming appointments', error });
+  }
+};
+
+exports.getPastAppointments = async (req, res) => {
+  try {
+    const userRole = req.userRole;
+    const userId = req.userId;
+    const loanOfficerId = req.loanOfficerId;
+
+    const currentDate = new Date();
+
+    let appointments;
+
+    if (userRole === 'user') {
+      appointments = await Appointment.find({
+        userId,
+        appointmentDate: { $lt: currentDate },
+      }).populate('loanOfficerId');
+    } else if (userRole === 'loan_officer') {
+      appointments = await Appointment.find({
+        loanOfficerId,
+        appointmentDate: { $lt: currentDate },
+      }).populate('userId');
+    } else if (userRole === 'admin') {
+      appointments = await Appointment.find({
+        appointmentDate: { $lt: currentDate },
+      }).populate('userId').populate('loanOfficerId');
+    } else {
+      return res.status(403).json({ message: 'Access denied. Invalid role.' });
+    }
+
+    res.status(200).json({ appointments });
+  } catch (error) {
+    console.error('Error fetching past appointments:', error);
+    res.status(500).json({ message: 'Error fetching past appointments', error });
+  }
+};
