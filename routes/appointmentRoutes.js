@@ -10,5 +10,6 @@ router.get('/loan-officer/appointments', verifyToken, AppointmentController.getL
 router.delete('/:appointmentId', verifyToken, AppointmentController.deleteAppointment);
 router.get('/upcoming', verifyToken, AppointmentController.getUpcomingAppointments);
 router.get('/past', verifyToken, AppointmentController.getPastAppointments);
+router.get('/all', verifyToken, isAdminOrLoanOfficer, AppointmentController.getAllAppointments);
 
 module.exports = router;

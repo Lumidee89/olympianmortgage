@@ -68,3 +68,81 @@ exports.getLeads = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+exports.editLead = async (req, res) => {
+  const { leadId } = req.params;
+  const {
+    loanType,
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    address,
+    leadTeam,
+  } = req.body;
+
+  try {
+    const lead = await Lead.findById(leadId);
+    if (!lead) {
+      return res.status(404).json({ message: "Lead not found" });
+    }
+
+    if (
+      req.userRole === "loan_officer" &&
+      req.loanOfficerId !== lead.leadTeam.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You can only edit your own leads." });
+    }
+
+    if (loanType) lead.loanType = loanType;
+    if (firstName) lead.firstName = firstName;
+    if (lastName) lead.lastName = lastName;
+    if (email) lead.email = email;
+    if (phoneNumber) lead.phoneNumber = phoneNumber;
+    if (address) lead.address = address;
+    if (leadTeam) {
+      const loanOfficer = await LoanOfficer.findById(leadTeam);
+      if (!loanOfficer) {
+        return res.status(404).json({ message: "Loan officer not found" });
+      }
+      lead.leadTeam = leadTeam;
+    }
+
+    await lead.save();
+
+    res.status(200).json({
+      message: "Lead updated successfully",
+      lead,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+exports.deleteLead = async (req, res) => {
+  const { leadId } = req.params;
+
+  try {
+    const lead = await Lead.findById(leadId);
+    if (!lead) {
+      return res.status(404).json({ message: "Lead not found" });
+    }
+
+    if (
+      req.userRole === "loan_officer" &&
+      req.loanOfficerId !== lead.leadTeam.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You can only delete your own leads." });
+    }
+
+    await Lead.findByIdAndDelete(leadId);
+
+    res.status(200).json({ message: "Lead deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};

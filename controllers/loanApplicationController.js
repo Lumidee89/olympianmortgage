@@ -375,18 +375,22 @@ exports.cloneLoanApplication = async (req, res) => {
       return res.status(404).json({ message: "Loan application not found" });
     }
 
-    // Allow Admin or Loan Officer to clone
     if (req.userRole !== "admin" && req.userRole !== "loan_officer") {
       return res
         .status(403)
         .json({ message: "Access denied. Insufficient permissions." });
     }
 
+    const loanData = loanToClone.toObject();
+    delete loanData._id;
+
     const clonedLoan = new LoanApplication({
-      ...loanToClone.toObject(),
+      ...loanData,
       status: "pending",
       assignedLoanOfficer: null,
+      createdAt: Date.now(),
     });
+
     await clonedLoan.save();
 
     res.status(201).json({

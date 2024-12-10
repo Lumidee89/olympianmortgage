@@ -193,3 +193,24 @@ exports.getPastAppointments = async (req, res) => {
     res.status(500).json({ message: 'Error fetching past appointments', error });
   }
 };
+
+exports.getAllAppointments = async (req, res) => {
+  try {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Only admins can view all appointments.' });
+    }
+
+    const appointments = await Appointment.find({})
+      .populate('userId', 'name email') 
+      .populate('loanOfficerId', 'name email'); 
+
+    if (!appointments || appointments.length === 0) {
+      return res.status(404).json({ message: 'No appointments found.' });
+    }
+
+    res.status(200).json({ appointments });
+  } catch (error) {
+    console.error('Error fetching all appointments:', error);
+    res.status(500).json({ message: 'Error fetching all appointments', error });
+  }
+};
