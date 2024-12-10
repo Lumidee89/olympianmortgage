@@ -1,15 +1,42 @@
 const express = require("express");
 const router = express.Router();
 const loanApplicationController = require("../controllers/loanApplicationController");
-const { verifyToken, isAdminOrLoanOfficer } = require("../middlewares/authMiddleware");
+const {
+  verifyToken,
+  isAdminOrLoanOfficer,
+} = require("../middlewares/authMiddleware");
 
-router.post("/create", verifyToken, loanApplicationController.createLoanApplication);
-router.put("/update", verifyToken, loanApplicationController.updateLoanApplication);
-router.post("/upload-documents", verifyToken, loanApplicationController.uploadDocuments);
+router.post(
+  "/create",
+  verifyToken,
+  loanApplicationController.createLoanApplication
+);
+router.put(
+  "/update",
+  verifyToken,
+  loanApplicationController.updateLoanApplication
+);
+router.post(
+  "/upload-documents",
+  verifyToken,
+  loanApplicationController.uploadDocuments
+);
 // Ibrahim
-router.post("/upload-e-sign-documents/:applicationId", verifyToken, loanApplicationController.updateESignDocuments);
-router.get("/loan-applications", verifyToken, loanApplicationController.getUserLoanApplications);
-router.patch("/loan-applications/:id/edit", verifyToken, loanApplicationController.editLoanApplication);
+router.post(
+  "/upload-e-sign-documents/:applicationId",
+  verifyToken,
+  loanApplicationController.updateESignDocuments
+);
+router.get(
+  "/loan-applications",
+  verifyToken,
+  loanApplicationController.getUserLoanApplications
+);
+router.patch(
+  "/loan-applications/:id/edit",
+  verifyToken,
+  loanApplicationController.editLoanApplication
+);
 router.post("/loan-offers", async (req, res) => {
   try {
     const loanApplicationData = req.body;
@@ -26,14 +53,40 @@ router.post("/loan-offers", async (req, res) => {
 // Clear all Loan Applications based on the User ID
 // - Ibrahim
 
-router.delete("/loan-applications/clear", verifyToken, loanApplicationController.clearLoanApplications);
+router.delete(
+  "/loan-applications/clear",
+  verifyToken,
+  loanApplicationController.clearLoanApplications
+);
 // Get Loan Application base on Loan ID
 // - Ibrahim
-router.get("/:loanApplicationId", verifyToken, loanApplicationController.getLoanApplicationById);
+router.get(
+  "/:loanApplicationId",
+  verifyToken,
+  loanApplicationController.getLoanApplicationById
+);
 // Fetch loans based on status
-router.get("/:loan-applications", verifyToken, loanApplicationController.getLoansBasedonStatus);
-router.get( "/user-documents", verifyToken, loanApplicationController.getUserDocuments);
-router.get("/assigned", verifyToken, isAdminOrLoanOfficer, loanApplicationController.getLoanApplicationsForOfficer);
-router.put("/approve", verifyToken, isAdminOrLoanOfficer, loanApplicationController.approveLoanApplication);
+router.get(
+  "/:loan-applications/status",
+  verifyToken,
+  loanApplicationController.getLoansBasedonStatus
+);
+router.get(
+  "/user-documents",
+  verifyToken,
+  loanApplicationController.getUserDocuments
+);
+router.get(
+  "/assigned",
+  verifyToken,
+  isAdminOrLoanOfficer,
+  loanApplicationController.getLoanApplicationsForOfficer
+);
+router.put(
+  "/approve",
+  verifyToken,
+  isAdminOrLoanOfficer,
+  loanApplicationController.approveLoanApplication
+);
 
 module.exports = router;

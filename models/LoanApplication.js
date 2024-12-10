@@ -43,6 +43,8 @@ const LoanApplicationSchema = new Schema({
           "currently serving on active duty",
           "currently retired discharged or separated from service",
           "surviving spouse",
+          "separated from service",
+          "currently retired discharged",
         ],
       },
       coBorrower: {
@@ -127,17 +129,17 @@ const LoanApplicationSchema = new Schema({
     },
     categories: [
       {
-        name: String, 
+        name: String,
         documents: [
           {
-            filename: String, 
+            filename: String,
             uploadedAt: { type: Date, default: Date.now },
           },
         ],
       },
     ],
   },
-  
+
   status: { type: String, default: "pending" },
   assignedLoanOfficer: { type: Schema.Types.ObjectId, ref: "Admin" },
   createdAt: { type: Date, default: Date.now },
