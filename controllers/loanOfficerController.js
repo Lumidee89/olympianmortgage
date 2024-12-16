@@ -6,7 +6,9 @@ const config = require("../config/config");
 exports.loginLoanOfficer = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const loanOfficer = await LoanOfficer.findOne({ email });
+    const loanOfficer = await LoanOfficer.findOne({
+      email: email.toLowerCase(),
+    });
     if (!loanOfficer) {
       return res.status(404).json({ message: "Loan officer not found" });
     }

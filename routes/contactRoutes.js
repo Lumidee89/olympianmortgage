@@ -4,21 +4,21 @@ const {
   verifyToken,
   isAdminOrLoanOfficer,
 } = require("../middlewares/authMiddleware");
-const upload = require("../middlewares/uploadMiddleware");
+// const upload = require("../middlewares/uploadMiddleware");
 const contactController = require("../controllers/contactController");
 
 router.post(
   "/add",
   verifyToken,
   isAdminOrLoanOfficer,
-  upload.single("profilePicture"),
+  // upload.single("profilePicture"),
   contactController.createContact
 );
 router.put(
   "/:contactId",
   verifyToken,
   isAdminOrLoanOfficer,
-  upload.single("profilePicture"),
+  // upload.single("profilePicture"),
   contactController.updateContact
 );
 router.delete(

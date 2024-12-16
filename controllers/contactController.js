@@ -1,6 +1,8 @@
 const Contact = require("../models/Contact");
 
 exports.createContact = async (req, res) => {
+  console.log(req.body);
+
   try {
     const {
       email,
@@ -10,7 +12,7 @@ exports.createContact = async (req, res) => {
       suffix,
       license,
       company,
-      licenseState, 
+      licenseState,
       dob,
       secondaryEmail,
       workPhone,
@@ -20,6 +22,8 @@ exports.createContact = async (req, res) => {
       cellPhone,
       homePhone,
       fax,
+      cobrandingLink,
+      profilePicture,
     } = req.body;
 
     const loanOfficerId =
@@ -27,7 +31,7 @@ exports.createContact = async (req, res) => {
         ? req.loanOfficerId
         : req.body.loanOfficerId;
 
-    const profilePicture = req.file ? req.file.path : null;
+    // const profilePicture = req.file ? req.file.path : null;
 
     const newContact = new Contact({
       email,
@@ -49,6 +53,7 @@ exports.createContact = async (req, res) => {
       fax,
       loanOfficerId,
       profilePicture,
+      cobrandingLink,
     });
 
     await newContact.save();
@@ -65,9 +70,9 @@ exports.updateContact = async (req, res) => {
     const { contactId } = req.params;
     const updatedData = req.body;
 
-    if (req.file) {
-      updatedData.profilePicture = req.file.path;
-    }
+    // if (req.file) {
+    //   updatedData.profilePicture = req.file.path;
+    // }
 
     const contact = await Contact.findById(contactId);
 
@@ -90,12 +95,10 @@ exports.updateContact = async (req, res) => {
       { new: true }
     );
 
-    res
-      .status(200)
-      .json({
-        message: "Contact updated successfully",
-        contact: updatedContact,
-      });
+    res.status(200).json({
+      message: "Contact updated successfully",
+      contact: updatedContact,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error updating contact", error });
   }

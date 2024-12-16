@@ -51,44 +51,58 @@ const transporter = nodemailer.createTransport({
 
 exports.register = async (req, res) => {
   const { firstname, lastname, email, phoneNumber, password } = req.body;
+
+  if (!firstname || !lastname || !email || !phoneNumber || !password) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "User already exists." });
     }
+
     const hashedPassword = await bcrypt.hash(password, 12);
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     const user = new User({
       firstname,
       lastname,
-      email,
+      email: email.toLowerCase(),
       phoneNumber,
       password: hashedPassword,
-      otp: otp,
+      otp,
       otpExpiry: Date.now() + 15 * 60 * 1000,
       isVerified: false,
       role: "user",
     });
+
     await user.save();
+
     await transporter.sendMail({
       from: `"Support" <${config.smtp.auth.user}>`,
       to: email,
       subject: "Account Verification OTP",
       text: `Your OTP for account verification is ${otp}. It is valid for 15 minutes.`,
     });
+
     res.status(201).json({
       message: "User registered successfully! OTP sent to your email.",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Email already in use." });
+    }
+    console.error("Server error:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
 
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -111,7 +125,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -128,7 +142,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       config.jwt.secret || process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "10h" }
     );
 
     res.status(200).json({
@@ -314,37 +328,55 @@ exports.getUserProfile = async (req, res) => {
 
 exports.adminRegister = async (req, res) => {
   const { firstname, lastname, email, phoneNumber, password } = req.body;
+
+  if (!firstname || !lastname || !email || !phoneNumber || !password) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
   try {
-    const existingAdmin = await User.findOne({ email, role: "admin" });
+    const existingAdmin = await User.findOne({
+      email: email.toLowerCase(),
+      role: "admin",
+    });
     if (existingAdmin) {
-      return res.status(400).json({ message: "Admin already exists" });
+      return res.status(400).json({ message: "Admin already exists." });
     }
+
     const hashedPassword = await bcrypt.hash(password, 12);
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Create a new admin document
     const admin = new User({
       firstname,
       lastname,
-      email,
+      email: email.toLowerCase(),
       phoneNumber,
       password: hashedPassword,
-      otp: otp,
+      otp,
       otpExpiry: Date.now() + 15 * 60 * 1000,
       isVerified: false,
-      role: "admin", 
+      role: "admin",
     });
+
     await admin.save();
+
     await transporter.sendMail({
       from: `"Support" <${config.smtp.auth.user}>`,
       to: email,
       subject: "Account Verification OTP",
       text: `Your OTP for account verification is ${otp}. It is valid for 15 minutes.`,
     });
+
     res.status(201).json({
       message: "Admin registered successfully! OTP sent to your email.",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Email already in use." });
+    }
+    console.error("Server error:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
 
@@ -352,7 +384,10 @@ exports.adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const admin = await User.findOne({ email, role: "admin" });
+    const admin = await User.findOne({
+      email: email.toLowerCase(),
+      role: "admin",
+    });
     if (!admin) {
       return res.status(401).json({ message: "Invalid email or password" });
     }

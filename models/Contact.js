@@ -10,6 +10,7 @@ const contactSchema = new mongoose.Schema(
     license: { type: String },
     company: { type: String },
     licenseState: { type: String },
+    cobrandingLink: { type: String },
     licenseStatus: { type: String },
     dob: { type: Date },
     secondaryEmail: { type: String },

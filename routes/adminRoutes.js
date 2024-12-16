@@ -5,7 +5,10 @@ const { adminRegister, adminLogin } = require("../controllers/authController");
 const loanApplicationController = require("../controllers/loanApplicationController");
 const leadController = require("../controllers/leadController");
 const authController = require("../controllers/authController");
-const {verifyToken, isAdminOrLoanOfficer} = require("../middlewares/authMiddleware");
+const {
+  verifyToken,
+  isAdminOrLoanOfficer,
+} = require("../middlewares/authMiddleware");
 
 router.post("/register", adminRegister);
 router.post("/login", adminLogin);
@@ -46,16 +49,28 @@ router.get("/user/:userId", verifyToken, adminController.getUserDetailsById);
 
 router.post(
   "/add-lead",
-  verifyToken, isAdminOrLoanOfficer,
+  verifyToken,
+  isAdminOrLoanOfficer,
   leadController.addLead
 );
 router.get(
   "/leads",
-  verifyToken, isAdminOrLoanOfficer,
+  verifyToken,
+  isAdminOrLoanOfficer,
   leadController.getLeads
 );
-router.put("/edit-lead/:leadId", verifyToken, isAdminOrLoanOfficer, leadController.editLead);
-router.delete("/delete-lead/:leadId", verifyToken, isAdminOrLoanOfficer, leadController.deleteLead);
+router.put(
+  "/edit-lead/:leadId",
+  verifyToken,
+  isAdminOrLoanOfficer,
+  leadController.editLead
+);
+router.delete(
+  "/delete-lead/:leadId",
+  verifyToken,
+  isAdminOrLoanOfficer,
+  leadController.deleteLead
+);
 
 router.post(
   "/clone-loan/:loanId",
