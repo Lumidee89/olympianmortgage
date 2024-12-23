@@ -7,10 +7,10 @@ const loanApplicationRoutes = require("./routes/loanApplicationRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const loanOfficerRoutes = require("./routes/loanOfficer");
 const chatRoutes = require("./routes/chat");
-const contentRoutes = require('./routes/contentRoutes');
-const notificationRoutes = require('./routes/notification');
-const appointmentRoutes = require('./routes/appointmentRoutes');
-const contactRoutes = require('./routes/contactRoutes');
+const contentRoutes = require("./routes/contentRoutes");
+const notificationRoutes = require("./routes/notification");
+const appointmentRoutes = require("./routes/appointmentRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 const app = express();
 
@@ -21,6 +21,9 @@ app.use(express.json());
 const allowedOrigins = [
   "http://localhost:5173",
   "https://olympian-mortgage.vercel.app",
+  "https://user-olympian.netlify.app",
+  "https://admin-olympian.netlify.app/",
+  "https://officer-olympian.netlify.app/",
   "http://localhost:5174",
   "http://localhost:5175",
 ];
@@ -46,10 +49,10 @@ app.use("/api/loan", loanApplicationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/loan-officer", loanOfficerRoutes);
 app.use("/api/chat", chatRoutes);
-app.use('/api/content', contentRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/contacts', contactRoutes);
+app.use("/api/content", contentRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/appointments", appointmentRoutes);
+app.use("/api/contacts", contactRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
