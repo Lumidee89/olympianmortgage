@@ -22,8 +22,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://olympian-mortgage.vercel.app",
   "https://user-olympian.netlify.app",
-  "https://admin-olympian.netlify.app/",
-  "https://officer-olympian.netlify.app/",
+  "https://admin-olympian.netlify.app",
+  "https://officer-olympian.netlify.app",
   "http://localhost:5174",
   "http://localhost:5175",
 ];
